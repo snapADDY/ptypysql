@@ -423,7 +423,7 @@ def format_join(s, **kwargs):
     "Format JOIN statement line `s`"
     s = re.sub(  # add indentation
         r"^(\w*)\s?(\w*)\s?(join )(.*)",
-        lambda x: (f"{x.group(1)} {x.group(2)}\n" if x.group(2) else (f"{x.group(1)}\n" if x.group(1) else "")) + x.group(3) + " " * 2 + x.group(4),
+        lambda x: (f"{x.group(1)} {x.group(2)}\n" if x.group(2) else (f"{x.group(1)}\n" if x.group(1) else "")) + x.group(3) + x.group(4),
         s,
         flags=re.I
     )
@@ -467,7 +467,7 @@ def format_on(s, **kwargs):
 # Cell
 def format_where(s, **kwargs):
     "Format WHERE statement line `s`"
-    s = re.sub(r"(where )", r"\1 ", s, flags=re.I)  # add indentation after WHERE
+    #s = re.sub(r"(where )", r"\1 ", s, flags=re.I)  # add indentation after WHERE
     # split by comment / non comment, quote / non-quote
     split_s = split_comment_quote(s)
     # define regex before loop
@@ -477,8 +477,8 @@ def format_where(s, **kwargs):
     for d in split_s:
         if not d["comment"] and not d["quote"]:
             s_aux = d["string"]
-            s_aux = indent_and.sub("\n" + " " * 3 + r"\1", s_aux)  # add newline and indentation for and
-            s_aux = indent_or.sub("\n" + " " * 4 + r"\1", s_aux)  # add newline and indentation for or
+            s_aux = indent_and.sub("\n" + " " * 2 + r"\1", s_aux)  # add newline and indentation for and
+            s_aux = indent_or.sub("\n" + " " * 3 + r"\1", s_aux)  # add newline and indentation for or
             d["string"] = s_aux
     # get split comment / non comment
     split_comment = compress_dicts(split_s, ["comment"])
@@ -511,7 +511,7 @@ def format_statement_line(s, **kwargs):
     "Format statement line `s`"
     statement_funcs = {
         r"^select": format_select,
-        r"^from": format_from,
+        # r"^from": format_from,
         r"^\w*\s?\w*\s?join": format_join,
         r"^on": format_on,
         r"filter \(where": format_filter_where,
