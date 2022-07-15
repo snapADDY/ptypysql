@@ -3,6 +3,7 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"MAIN_STATEMENTS": "00_core.ipynb",
+         "CAP_STATEMENTS": "00_core.ipynb",
          "clean_query": "00_core.ipynb",
          "preformat_statements": "00_core.ipynb",
          "lowercase_query": "00_core.ipynb",
@@ -16,6 +17,7 @@ index = {"MAIN_STATEMENTS": "00_core.ipynb",
          "format_join": "00_core.ipynb",
          "format_on": "00_core.ipynb",
          "format_where": "00_core.ipynb",
+         "format_filter_where": "00_core.ipynb",
          "format_statement_line": "00_core.ipynb",
          "format_statements": "00_core.ipynb",
          "format_multiline_comments": "00_core.ipynb",

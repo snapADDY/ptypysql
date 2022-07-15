@@ -110,48 +110,79 @@ def format_sql_file(f, max_len=82):
     * 1 = Formatting applied
     * 2 = Problem detected, formatting aborted
     """
+    exit_code = 0
+
     # open the file
     with open(f, "r") as file:
-        sql_commands = file.read()
-    # format SQL statements
-    formatted_file = format_sql_commands(sql_commands, max_len=max_len)
-    if isinstance(formatted_file, dict):
-        print(f"Something went wrong in file: {f}")
-        if "semicolon" in formatted_file.keys():
-            print(
-                (
-                "[WARNING] Identified CREATE keyword more than twice within the same query " +
-                f"at lines {formatted_file['semicolon']['lines']}\n"
-                "You may have forgotten a semicolon (;) to delimit the queries"
-                )
-            )
-        if "unbalanced_parenthesis" in formatted_file.keys():
-            print(
-                (
-                "[WARNING] Identified unbalanced parenthesis " +
-                f"at lines {formatted_file['unbalanced_parenthesis']['lines']}\n"
-                "You should check your parenthesis"
-                )
-            )
-        if "unbalanced_case" in formatted_file.keys():
-            print(
-                (
-                "[WARNING] Identified unbalanced case when ... end " +
-                f"at lines {formatted_file['unbalanced_case']['lines']}\n"
-                "You should check for missing case or end keywords"
-                )
-            )
-        print(f"Aborting formatting for file {f}")
-        exit_code = 2
+        py_scripts = file.read()
 
-        print(f"Aborting formatting for file {f}")
-        exit_code = 2
+    # use for python
+    # TODO: support for custom SQL string searching
+    sql_regex = re.compile(r'.+DB\.(?:fetch|execute)(?:\_\w+)?\(\s*"""\s*(?:--sql)?\s*([\s\S]+?)"""')
+    sql_heading = re.compile(r'(DB\.(?:fetch|execute)(?:\_\w+)?\()(\s*"""\s*(?:--sql)?\s*)')
+    sqls = sql_regex.finditer(py_scripts)
+    for sql in sqls:
+        sql_function = sql.group()
+        sql_commands = sql.group(1)
+        # format SQL statements
+        formatted_file = format_sql_commands(sql_commands, max_len=max_len)
+        if isinstance(formatted_file, dict):
+            print(f"Something went wrong in file: {f}")
+            if "semicolon" in formatted_file.keys():
+                print(
+                    (
+                    "[WARNING] Identified CREATE keyword more than twice within the same query " +
+                    f"at lines {formatted_file['semicolon']['lines']}\n"
+                    "You may have forgotten a semicolon (;) to delimit the queries"
+                    )
+                )
+            if "unbalanced_parenthesis" in formatted_file.keys():
+                print(
+                    (
+                    "[WARNING] Identified unbalanced parenthesis " +
+                    f"at lines {formatted_file['unbalanced_parenthesis']['lines']}\n"
+                    "You should check your parenthesis"
+                    )
+                )
+            if "unbalanced_case" in formatted_file.keys():
+                print(
+                    (
+                    "[WARNING] Identified unbalanced case when ... end " +
+                    f"at lines {formatted_file['unbalanced_case']['lines']}\n"
+                    "You should check for missing case or end keywords"
+                    )
+                )
+            print(f"Aborting formatting for file {f}")
+            return 2
 
-    else:
-        exit_code = 0 if sql_commands == formatted_file else 1
-        # overwrite file
-        with open(f, "w") as f:
-            f.write(formatted_file)
+        else:
+            if sql_commands == formatted_file:
+                exit_code += 0
+            else:
+                exit_code = 1
+                # for safety
+                if sql_function in py_scripts and sql_commands in sql_function:
+                    indent = " " * (len(sql_function) - len(sql_function.lstrip()) + 4)
+                    formatted_file = "\n".join([indent + s for s in formatted_file.split("\n")])
+                    formatted_function = sql_heading.sub(r'\1' + f'\n{indent}"""\n', sql_function)
+                    formatted_function = formatted_function.replace(sql_commands, formatted_file)
+                    py_scripts = py_scripts.replace(sql_function, formatted_function)
+                else:
+                    print(f"Something went wrong in file: {f}")
+                    print(
+                        (
+                        f"[WARNING] The original SQL query does not exist in the file : {f}\n" +
+                        f"The corresponding SQL query is:\n{sql_commands} \n" +
+                        f"The formatted SQL query is:\n{formatted_file} \n" +
+                        "You may want to replace the SQL query manually"
+                        )
+                   )
+                    return 2
+
+    # overwrite file
+    with open(f, "w") as file:
+        file.write(py_scripts)
+
     return exit_code
 
 # Cell

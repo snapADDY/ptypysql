@@ -94,9 +94,9 @@ def remove_whitespaces_parenthesis(s):
 # Cell
 def add_whitespaces_between_symbols(s):
     "Add whitespaces between symbols in line `s`"
-    s = re.sub(r"([^\s=!<>])([=!<>]+)", r"\1 \2", s, flags=re.I)  # no space left
+    s = re.sub(r"([^\s=!<>-])(-?[=!<>]+)", r"\1 \2", s, flags=re.I)  # no space left
     s = re.sub(r"([=!<>]+)([^\s=!<>])", r"\1 \2", s, flags=re.I)  # no space right
-    s = re.sub(r"([^\s=!<>])([=!<>]+)([^\s=!<>])", r"\1 \2 \3", s, flags=re.I)  # no space left and right
+    s = re.sub(r"([^\s=!<>-])(-?[=!<>]+)([^\s=!<>])", r"\1 \2 \3", s, flags=re.I)  # no space left and right
     return s
 
 # Cell
@@ -220,8 +220,14 @@ def split_query(s):
     start = 0
     select_re = re.compile(r"^[\n\s\]\(]*\bselect\b\s$")
     from_re = re.compile(r"^[\n\s\]]\bfrom\b\s$")
+    balanced_parentheses = 0
+    global_balanced_parentheses = 0
     # loop over character positions
     for i, c in enumerate(s):
+        if c == "(":
+            balanced_parentheses += 1
+        if c == ")":
+            balanced_parentheses -= 1
         if select_re.match(s_low[max(i-1, 0):i+7]) and k == 0:  # k = 0 -> no comment
             s_comp.append({
                 "string": s[start:i],
@@ -231,8 +237,9 @@ def split_query(s):
             })
             start = i
             select_region = True # after select starts the select region
-        elif from_re.match(s_low[max(i-1, 0):i+5]) and k == 0:
-            select_open = False
+            global_balanced_parentheses = balanced_parentheses #save the global paretheses value
+            balanced_parentheses = 0 #reset parentheses value
+        elif from_re.match(s_low[max(i-1, 0):i+5]) and k == 0 and balanced_parentheses == 0:
             s_comp.append({
                 "string": s[start:i],
                 "comment": comment_region,
@@ -241,6 +248,7 @@ def split_query(s):
             })
             start = i
             select_region = False # after from ends the select region
+            balanced_parentheses = global_balanced_parentheses #get back the global paretheses value
         elif (
             s[i:i+4] == "[CS]" and
             not comment_open1 and
@@ -570,7 +578,7 @@ def extract_outer_subquery(s):
     k = 0
     # loop over string characters
     for i, c in enumerate(s):
-        if s[i:(i+8)] == "(\nSELECT" and ind: # query start
+        if s[i:(i+8)] in {"(\nSELECT", "(\nWHERE "} and ind: # query start
             subquery_pos.append(i)
             k = 0  # set the parenthesis counter to 0
             # turn off the indicator for the program to know
@@ -587,27 +595,40 @@ def extract_outer_subquery(s):
 # Cell
 def format_subquery(s, previous_s):
     "Format subquery in line `s` based on indentation on `previous_s`"
-    s = re.sub(r"^\(\nSELECT", "(SELECT", s)  # remove newline between parenthesis and SELECT
     # get reference line for the indentation level
     # and remove whitespaces from the left
-    last_line = previous_s.split("\n")[-1]
-    ref_line = last_line.lstrip()
-    # if the line contains a JOIN statement then indent with
-    # 4 whitespaces
-    if re.match(r"\w+ join", ref_line, flags=re.I):
-        ref_line = "    " + ref_line
-    indentation = len(ref_line) + 1  # get indentation level
-    split_s = s.split("\n")  # get lines in subquery
-    indented_s = [
-        " " * indentation + line  # indent all lines the same
-        if not re.match(r"SELECT", line)
-        else line
-        for line in split_s[1:]
-    ]
-    # SELECT line + indented lines afterwards
-    formatted_split = [split_s[0]] + indented_s
-    # concatenate with newline character
-    formatted_s = "\n".join(formatted_split)
+    last_line = previous_s.strip().split("\n")[-1]
+    last_line_indent = len(last_line) - len(last_line.lstrip())
+    indentation = " " * (last_line_indent + 4)
+
+    #split into main string and substring
+    indented_query = []
+    inner_subquery = extract_outer_subquery(s)
+    if inner_subquery is not None:
+        while inner_subquery is not None:
+            split_s = [
+                s[0:inner_subquery[0]],
+                s[inner_subquery[0]:(inner_subquery[1])],
+                s[(inner_subquery[1]):]
+            ]
+
+            indented_s_0 = [indentation + line for line in split_s[0].split("\n")]
+            split_s[0] = "\n".join(indented_s_0)
+            indented_query.extend(split_s[:2])
+            s = split_s[2]
+            inner_subquery = extract_outer_subquery(s)
+
+        indented_s_2 = [indentation + line for line in split_s[2].split("\n")]
+        indented_query.append("\n".join(indented_s_2))
+
+        # concatenate to the substring if exists
+        formatted_s = "".join(indented_query)
+    else:
+        indented_s = [indentation + line for line in s.split("\n")]
+        formatted_s = "\n".join(indented_s)
+
+    # add new line and indentation before the end of the ")"
+    formatted_s = re.sub(r"\s*(\))$", "\n" + " " * last_line_indent + r"\1", formatted_s)
     return formatted_s
 
 # Cell
@@ -616,8 +637,8 @@ def check_sql_query(s):
     in quotes"""
     split_s = split_query(s)  # split in comment / non-comment, quote / non-quote regions
     s_code = "".join([d["string"] for d in split_s if not d["comment"] and not d["quote"]])
-    return (bool(re.search(pattern=r".*(?:select|create.{0,10}(?:table|view)).*", string=s_code, flags=re.I)) and
-            not bool(re.search(pattern=r"create(?!.*(?:table|view))", string=s_code, flags=re.I)))
+    return (bool(re.search(pattern=r"\bselect\b|\bcreate\b.{0,27}(\btable\b|\bview\b)", string=s_code, flags=re.I)) and
+            not bool(re.search(pattern=r"\bcreate\b(?!.*(\btable\b|\bview\b))", string=s_code, flags=re.I)))
 
 # Cell
 def check_skip_marker(s):
