@@ -474,7 +474,7 @@ def format_where(s, max_len = 82):
 # Cell
 def format_filter_where(s, **kwargs):
     "Format WHERE statement line `s`"
-    s = re.sub(r"(filter)\s+\((where)\s+", r"\1 ", s, flags=re.I)  # add indentation after WHERE
+    s = re.sub(r"(filter)\s+\((where)\s+", r"\1 (\n\2 ", s, flags=re.I)  # add indentation after WHERE
     return s
 
 # Cell
