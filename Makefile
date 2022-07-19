@@ -2,11 +2,11 @@
 SHELL := /bin/bash
 SRC = $(wildcard ./*.ipynb)
 
-all: sql_formatter docs
+all: ptypysql docs
 
-sql_formatter: $(SRC)
+ptypysql: $(SRC)
 	nbdev_build_lib
-	touch sql_formatter
+	touch ptypysql
 
 sync:
 	nbdev_update_lib

@@ -1,5 +1,5 @@
 {
-  "sql_formatter": {
+  "ptypysql": {
     "Overview": "/",
     "core": "core.html",
     "format_file": "format_file.html",

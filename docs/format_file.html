@@ -32,13 +32,34 @@ nb_path: "nbs/01_format_file.ipynb"
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">module_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">))</span>
+<span class="k">if</span> <span class="n">module_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_path</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 </div>
     {% endraw %}
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Use-Case">Use-Case<a class="anchor-link" href="#Use-Case"> </a></h2><p>Assume you have a file called sql_file.sql containing SQL statements and queries.</p>
+<h2 id="Use-Case">Use-Case<a class="anchor-link" href="#Use-Case"> </a></h2><p>Assume you have a file called sql_file.py containing SQL statements and queries.</p>
 <p>After reading it in python we could have something like this:</p>
 
 </div>
@@ -105,22 +126,25 @@ nb_path: "nbs/01_format_file.ipynb"
 <span class="s2">SELECT a.car_id,</span>
 <span class="s2">       b.car_name,</span>
 <span class="s2">       sum(a.price) OVER (PARTITION BY b.car_name</span>
-<span class="s2">                          ORDER BY a.car_id) as sum_price,</span>
+<span class="s2">                          ORDER BY a.car_id) AS sum_price,</span>
 <span class="s2">       a.price</span>
-<span class="s2">FROM   sales as a</span>
-<span class="s2">    LEFT JOIN (SELECT car_id,</span>
-<span class="s2">                      car_name</span>
-<span class="s2">               FROM   cars) as b</span>
-<span class="s2">        ON a.car_id = b.car_id</span>
+<span class="s2">FROM   sales AS a</span>
+<span class="s2">LEFT</span>
+<span class="s2">JOIN   (</span>
+<span class="s2">    SELECT car_id,</span>
+<span class="s2">           car_name</span>
+<span class="s2">    FROM   cars</span>
+<span class="s2">) AS b</span>
+<span class="s2">    ON a.car_id = b.car_id</span>
 <span class="s2">WHERE  car_id &gt; 1</span>
-<span class="s2">   and car_id &lt;= 100</span>
+<span class="s2">   AND car_id &lt;= 100</span>
 <span class="s2">ORDER BY b.car_name;</span>
 
 
 <span class="s2">-- Table no. 1 --</span>
 <span class="s2">CREATE OR REPLACE TABLE first_table AS -- my first table</span>
 <span class="s2">SELECT car_id,</span>
-<span class="s2">       avg(price) as avg_price</span>
+<span class="s2">       avg(price) AS avg_price</span>
 <span class="s2">FROM   first_view</span>
 <span class="s2">GROUP BY car_id</span>
 <span class="s2">ORDER BY car_id;</span>
@@ -138,9 +162,17 @@ nb_path: "nbs/01_format_file.ipynb"
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>python file
+test_script.py</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Formatting-philosophy-of-SQL-files">Formatting philosophy of SQL files<a class="anchor-link" href="#Formatting-philosophy-of-SQL-files"> </a></h3><ul>
 <li>Every SQL-query is separated from above by two new lines</li>
-<li>Every SQL-query is formatted via <a href="/sql_formatter/core.html#format_sql"><code>format_sql</code></a></li>
+<li>Every SQL-query is formatted via <a href="/ptypysql/core.html#format_sql"><code>format_sql</code></a></li>
 </ul>
 
 </div>
@@ -164,7 +196,7 @@ nb_path: "nbs/01_format_file.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="format_sql_commands" class="doc_header"><code>format_sql_commands</code><a href="https://github.com/PabloRMira/sql_formatter/tree/master/sql_formatter/format_file.py#L17" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_commands</code>(<strong><code>s</code></strong>, <strong><code>max_len</code></strong>=<em><code>82</code></em>)</p>
+<h4 id="format_sql_commands" class="doc_header"><code>format_sql_commands</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L17" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_commands</code>(<strong><code>s</code></strong>, <strong><code>max_len</code></strong>=<em><code>99</code></em>)</p>
 </blockquote>
 <p>Format SQL commands in <code>s</code>. If SELECT line is longer than <code>max_len</code> then reformat line</p>
 
@@ -215,8 +247,7 @@ nb_path: "nbs/01_format_file.ipynb"
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
---- Views for some nice data mart ---
+<pre>--- Views for some nice data mart ---
 use database my_database;
 use schema my_schema;
 
@@ -225,22 +256,25 @@ CREATE OR REPLACE VIEW first_view AS -- my first view
 SELECT a.car_id,
        b.car_name,
        sum(a.price) OVER (PARTITION BY b.car_name
-                          ORDER BY a.car_id) as sum_price,
+                          ORDER BY a.car_id) AS sum_price,
        a.price
-FROM   sales as a
-    LEFT JOIN (SELECT car_id,
-                      car_name
-               FROM   cars) as b
-        ON a.car_id = b.car_id
+FROM   sales AS a
+LEFT
+JOIN   (
+    SELECT car_id,
+           car_name
+    FROM   cars
+) AS b
+    ON a.car_id = b.car_id
 WHERE  car_id &gt; 1
-   and car_id &lt;= 100
+   AND car_id &lt;= 100
 ORDER BY b.car_name;
 
 
 -- Table no. 1 --
 CREATE OR REPLACE TABLE first_table AS -- my first table
 SELECT car_id,
-       avg(price) as avg_price
+       avg(price) AS avg_price
 FROM   first_view
 GROUP BY car_id
 ORDER BY car_id;
@@ -311,8 +345,7 @@ ORDER BY car_id;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-use database my_database;
+<pre>use database my_database;
 
 /*skip-formatter*/
 create Or replace View my_view aS
@@ -369,8 +402,7 @@ GROUP BY asdf;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-CREATE OR REPLACE TABLE my_table AS
+<pre>CREATE OR REPLACE TABLE my_table AS
 SELECT asdf,
        qwer
 FROM   table2
@@ -420,8 +452,7 @@ GROUP BY asdf;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-CREATE OR REPLACE TABLE my_table AS
+<pre>CREATE OR REPLACE TABLE my_table AS
 SELECT asdf,
        qwer
 FROM   table2
@@ -463,7 +494,7 @@ GROUP BY asdf; -- some comment
 <span class="sd">SELECT asdf,</span>
 <span class="sd">       qwer, /* ; */</span>
 <span class="sd">       qwer2, -- ;</span>
-<span class="sd">       replace(&#39;;&#39;, &#39;&#39;, qwer3) as qwer4</span>
+<span class="sd">       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4</span>
 <span class="sd">FROM   table1; /* Some comment */</span>
 
 
@@ -484,12 +515,11 @@ GROUP BY asdf; -- some comment
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-CREATE TABLE my_table AS
+<pre>CREATE TABLE my_table AS
 SELECT asdf,
        qwer, /* ; */
        qwer2, -- ;
-       replace(&#39;;&#39;, &#39;&#39;, qwer3) as qwer4
+       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4
 FROM   table1; /* Some comment */
 
 
@@ -533,7 +563,7 @@ FROM   my_table; /* Another comment */
 <span class="sd">SELECT asdf,</span>
 <span class="sd">       qwer, /* ; */</span>
 <span class="sd">       qwer2, -- ;</span>
-<span class="sd">       replace(&#39;;&#39;, &#39;&#39;, qwer3) as qwer4</span>
+<span class="sd">       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4</span>
 <span class="sd">FROM   table1;</span>
 
 
@@ -554,12 +584,11 @@ FROM   my_table; /* Another comment */
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-CREATE OR REPLACE TRANSIENT TABLE my_table AS
+<pre>CREATE OR REPLACE TRANSIENT TABLE my_table AS
 SELECT asdf,
        qwer, /* ; */
        qwer2, -- ;
-       replace(&#39;;&#39;, &#39;&#39;, qwer3) as qwer4
+       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4
 FROM   table1;
 
 
@@ -626,8 +655,7 @@ FROM   my_table;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-{&#39;semicolon&#39;: {&#39;error_code&#39;: 2, &#39;lines&#39;: [(1, 7)]}}
+<pre>{&#39;semicolon&#39;: {&#39;error_code&#39;: 2, &#39;lines&#39;: [(1, 7)]}}
 </pre>
 </div>
 </div>
@@ -681,8 +709,7 @@ FROM   my_table;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-{&#39;unbalanced_parenthesis&#39;: {&#39;error_code&#39;: 3, &#39;lines&#39;: [[3, 4], [9]]}}
+<pre>{&#39;unbalanced_parenthesis&#39;: {&#39;error_code&#39;: 3, &#39;lines&#39;: [[3, 4], [9]]}}
 </pre>
 </div>
 </div>
@@ -739,8 +766,7 @@ FROM   my_table;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-{&#39;semicolon&#39;: {&#39;error_code&#39;: 2, &#39;lines&#39;: [(1, 8)]}, &#39;unbalanced_parenthesis&#39;: {&#39;error_code&#39;: 3, &#39;lines&#39;: [[3, 4, 9]]}}
+<pre>{&#39;semicolon&#39;: {&#39;error_code&#39;: 2, &#39;lines&#39;: [(1, 8)]}, &#39;unbalanced_parenthesis&#39;: {&#39;error_code&#39;: 3, &#39;lines&#39;: [[3, 4, 9]]}}
 </pre>
 </div>
 </div>
@@ -791,8 +817,7 @@ FROM   my_table;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-{&#39;unbalanced_case&#39;: {&#39;error_code&#39;: 4, &#39;lines&#39;: [[3]]}}
+<pre>{&#39;unbalanced_case&#39;: {&#39;error_code&#39;: 4, &#39;lines&#39;: [[3]]}}
 </pre>
 </div>
 </div>
@@ -820,7 +845,7 @@ FROM   my_table;
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="format_sql_file" class="doc_header"><code>format_sql_file</code><a href="https://github.com/PabloRMira/sql_formatter/tree/master/sql_formatter/format_file.py#L104" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_file</code>(<strong><code>f</code></strong>, <strong><code>max_len</code></strong>=<em><code>82</code></em>)</p>
+<h4 id="format_sql_file" class="doc_header"><code>format_sql_file</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L104" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_file</code>(<strong><code>f</code></strong>, <strong><code>max_len</code></strong>=<em><code>99</code></em>)</p>
 </blockquote>
 <p>Format file <code>f</code> with SQL commands and overwrite the file.
 If SELECT line is longer than 82 characters then reformat line</p>
@@ -1135,7 +1160,7 @@ From my_table;
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="format_sql_files" class="doc_header"><code>format_sql_files</code><a href="https://github.com/PabloRMira/sql_formatter/tree/master/sql_formatter/format_file.py#L158" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files</code>(<strong><code>files</code></strong>, <strong><code>recursive</code></strong>=<em><code>False</code></em>, <strong><code>max_len</code></strong>=<em><code>82</code></em>)</p>
+<h4 id="format_sql_files" class="doc_header"><code>format_sql_files</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L193" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files</code>(<strong><code>files</code></strong>, <strong><code>recursive</code></strong>=<em><code>False</code></em>, <strong><code>max_len</code></strong>=<em><code>99</code></em>)</p>
 </blockquote>
 <p>Format SQL <code>files</code></p>
 
@@ -1279,7 +1304,7 @@ ORDER BY car_id;
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="format_sql_files_cli" class="doc_header"><code>format_sql_files_cli</code><a href="https://github.com/PabloRMira/sql_formatter/tree/master/sql_formatter/format_file.py#L175" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files_cli</code>()</p>
+<h4 id="format_sql_files_cli" class="doc_header"><code>format_sql_files_cli</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L210" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files_cli</code>()</p>
 </blockquote>
 <p>Format SQL files</p>
 
@@ -1301,5 +1326,5 @@ ORDER BY car_id;
     {% endraw %}
 
 </div>
- 
+
 

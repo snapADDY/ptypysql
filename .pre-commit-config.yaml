@@ -1,8 +1,8 @@
 repos:
   - repo: local
     hooks:
-    - id: sql_formatter
-      name: SQL formatter
+    - id: ptypysql
+      name: Pretty Python SQL
       language: system
-      entry: sql-formatter
-      files: \.sql$
+      entry: ptypysql
+      files: \.py$

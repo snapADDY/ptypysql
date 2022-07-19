@@ -506,7 +506,7 @@ def format_statements(s, **kwargs):
 
 # Cell
 def add_join_as(s, **kwargs):
-    as_on_regex = re.compile(r"(\)(?<!\bAS\b)\s?|\w(?<!\bAS\b)\s)(\w+|\'.+\')(\s+\bON\b)")
+    as_on_regex = re.compile(r"(\)(?<!\bAS\b)\s?|\w(?<!\bJOIN\b)(?<!\bAS\b)\s)(\w+|\'.+\')(\s+\bON\b)")
     s = as_on_regex.sub(lambda x: x.group(1).rstrip() + " AS " + x.group(2) + x.group(3), s)
     return s
 

@@ -68,8 +68,8 @@ modules = ["core.py",
            "utils.py",
            "validation.py"]
 
-doc_url = "https://PabloRMira.github.io/sql_formatter/"
+doc_url = "https://snapADDY.github.io/ptypysql/"
 
-git_url = "https://github.com/PabloRMira/sql_formatter/tree/master/"
+git_url = "https://github.com/snapADDY/ptypysql/tree/master/"
 
 def custom_doc_links(name): return None

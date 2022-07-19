@@ -1,6 +1,6 @@
-- id: sql_formatter
-  name: SQL formatter
-  entry: sql-formatter
+- id: ptypysql
+  name: Pretty Python SQL
+  entry: ptypysql
   language: python
-  types: [file, sql]
+  types: [file, py]
   require_serial: true

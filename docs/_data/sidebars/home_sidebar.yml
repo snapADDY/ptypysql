@@ -25,6 +25,6 @@ entries:
       title: Additional tests
       url: additional_tests.html
     output: web
-    title: sql_formatter
+    title: ptypysql
   output: web
   title: Sidebar

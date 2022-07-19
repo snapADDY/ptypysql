@@ -1,9 +1,9 @@
-repository: PabloRMira/sql_formatter
+repository: snapADDY/ptypysql
 output: web
-topnav_title: sql_formatter
-site_title: sql_formatter
-company_name: Pablo Rodriguez Mira
-description: A SQL formatter
+topnav_title: ptypysql
+site_title: ptypysql
+company_name: snapADDY
+description: A Pretty Python SQL
 # Set to false to disable KaTeX math
 use_math: true
 # Add Google analytics id if you have one and want to use it here
@@ -20,7 +20,7 @@ exclude:
   - .idea/
   - .gitignore
   - vendor
- 
+
 exclude: [vendor]
 
 highlighter: rouge
@@ -60,4 +60,4 @@ sidebars:
 - home_sidebar
 
 theme: jekyll-theme-cayman
-baseurl: /sql_formatter/
+baseurl: /ptypysql/

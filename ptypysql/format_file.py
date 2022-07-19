@@ -8,7 +8,7 @@ import os
 import tempfile
 import argparse
 from glob import glob
-import sql_formatter
+import ptypysql
 from .core import *
 from .utils import *
 from .validation import *
@@ -28,8 +28,8 @@ def format_sql_commands(s, max_len=99):
     val_case_end_balanced = [validate_case_when(sp) for sp in split_s if sp != ""]
     val_summary_case = sum([val["exit_code"] for val in val_case_end_balanced])
     if sum([val_summary_semicolon, val_summary_balanced, val_summary_case]) == 0:
-        split_comment_after_semicolon = re.compile("((?:\n|create|select))")
-        check_comment_after_semicolon = re.compile(r"[\r\t\f\v ]*(?:\/\*|--)")
+        split_comment_after_semicolon = re.compile("((?:\n|create|select|with))")
+        check_comment_after_semicolon = re.compile(r"(?:;)[\r\t\f\v ]*(?:\/\*|--)")
         check_ending_semicolon = re.compile(r";\s*$")
         split_s_out = []  # initialize container
         last_i = len(split_s) - 1
@@ -118,8 +118,8 @@ def format_sql_file(f, max_len=99):
 
     # use for python
     # TODO: support for custom SQL string searching
-    sql_regex = re.compile(r'.+DB\.(?:fetch|execute)(?:\_\w+)?\(\s*"""\s*(?:--sql)?\s*([\s\S]+?)"""')
-    sql_heading = re.compile(r'(DB\.(?:fetch|execute)(?:\_\w+)?\()(\s*"""\s*(?:--sql)?\s*)')
+    sql_regex = re.compile(r'.+DB\.(?:fetch|execute)(?:\_\w+)?\(\s*\"\"\"\s*(?:--sql)?\s*([\s\S]+?)\"\"\"')
+    sql_heading = re.compile(r'(DB\.(?:fetch|execute)(?:\_\w+)?\()(\s*\"\"\"\s*(?:--sql)?\s*)')
     sqls = sql_regex.finditer(py_scripts)
     for sql in sqls:
         sql_function = sql.group()
@@ -233,7 +233,7 @@ def format_sql_files_cli():
         "-v",
         "--version",
         action="version",
-        version=f"sql_formatter version {sql_formatter.__version__}"
+        version=f"ptypysql version {ptypysql.__version__}"
     )
     args = parser.parse_args()
     format_sql_files(files=args.files, recursive=args.recursive, max_len=args.max_line_length)

@@ -1,2 +1,17 @@
-[sql_formatter]
-max_line_length = 80
+[tool.poetry]
+name = "ptypysql"
+version = "0.1.0"
+description = "Pretty Python SQL: A SQL formatter for String SQL query in Python script, built for PostgreSQL"
+authors = ["adam444555 <a473489548@gmail.com>"]
+license = "apache2"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+notebook = "^6.4.12"
+nbdev = "^1.2.11"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

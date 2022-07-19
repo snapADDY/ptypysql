@@ -1,13 +1,13 @@
 ---
 
-title: sql_formatter
+title: ptypysql
 
 
 keywords: fastai
 sidebar: home_sidebar
 
-summary: "A Python based SQL formatter"
-description: "A Python based SQL formatter"
+summary: "A Python String SQL Formatter / Beautifier, built for PostgreSQL"
+description: "A Python String SQL Formatter / Beautifier, built for PostgreSQL"
 nb_path: "nbs/index.ipynb"
 ---
 <!--
@@ -31,8 +31,7 @@ nb_path: "nbs/index.ipynb"
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="https://github.com/PabloRMira/sql_formatter/workflows/CI/badge.svg" alt="CI"> <a href="https://pypi.org/project/sql-formatter/#description"><img src="https://img.shields.io/pypi/v/sql-formatter?color=yellow&amp;label=pypi%20version" alt="PyPI"></a>
-<a href="https://anaconda.org/pablormira/sql_formatter"><img src="https://anaconda.org/pablormira/sql_formatter/badges/version.svg" alt="Anaconda-Server Badge"></a></p>
+<p><img src="https://github.com/snapADDY/ptypysql/workflows/CI/badge.svg" alt="CI"> <a href="https://pypi.org/project/ptypysql/#description"><img src="https://img.shields.io/pypi/v/ptypysql?color=yellow&amp;label=pypi%20version" alt="PyPI"></a></p>
 
 </div>
 </div>
@@ -40,35 +39,31 @@ nb_path: "nbs/index.ipynb"
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="How-to-install">How to install<a class="anchor-link" href="#How-to-install"> </a></h2><p>Via pip</p>
-<p><code>pip install sql-formatter</code></p>
-<p>or via conda</p>
-<p><code>conda install -c pablormira sql_formatter</code></p>
+<p><code>pip install ptypysql</code></p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="How-to-use">How to use<a class="anchor-link" href="#How-to-use"> </a></h2><p>Format your SQL files via the command line</p>
-<p><code>sql-formatter sql_file.sql sql_file2.sql</code></p>
-<p>You can also format all your SQL-files via</p>
-<p><code>sql-formatter *.sql</code></p>
-<p>To format all your SQL files recursively use</p>
-<p><code>sql-formatter -r "*.sql"</code></p>
+<h2 id="How-to-use">How to use<a class="anchor-link" href="#How-to-use"> </a></h2><p>Currently it only supports for SQL in string format as <code>"""..."""</code> (Not work with<code>"..."</code>), and wrap by a function <code>DB.fetch_*(</code>, e.g.,</p>
+<p><code>DB.fetch_all("""select * from table1 where id = 1""")</code></p>
+<p>You can format SQL queries in python script via the command line</p>
+<p><code>ptypysql sql.py</code></p>
+<p>or format all your SQL queries in all python scripts under the same directory via</p>
+<p><code>ptypysql *.py</code></p>
+<p>Or even format all your SQL queries in the project recursively use</p>
+<p><code>ptypysql -r "*.py"</code></p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Controlling-maximum-length-line-via-truncation">Controlling maximum length line via truncation<a class="anchor-link" href="#Controlling-maximum-length-line-via-truncation"> </a></h3><p>The <code>sql_formatter</code> will try to truncate too long lines in the <code>SELECT</code> clause for either</p>
-<ul>
-<li>Function with many arguments</li>
-<li><code>in</code> with many elements</li>
-</ul>
-<p>The default maximum line length is 82 after line stripping.</p>
-<p>You can control the maximum length line using e.g.</p>
-<p><code>sql-formatter sql_file.sql --max-line-length=50</code></p>
+<h3 id="Controlling-maximum-length-line-via-truncation">Controlling maximum length line via truncation<a class="anchor-link" href="#Controlling-maximum-length-line-via-truncation"> </a></h3><p>The <code>ptypysql</code> will try to truncate too long lines based on the setting of max-line-length.</p>
+<p>By default the maximum line length is 99.</p>
+<p>You can control the maximum line length by:</p>
+<p><code>ptypysql sql.py --max-line-length=50</code></p>
 
 </div>
 </div>
@@ -81,33 +76,32 @@ nb_path: "nbs/index.ipynb"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><a href="https://pre-commit.com">pre-commit</a> is a nice development tool to automatize the binding of pre-commit hooks. After installation and configuration <code>pre-commit</code> will run your hooks before you commit any change.</p>
-<p>To add <code>sql-formatter</code> as a hook to your <code>pre-commit</code> configuration to format your SQL files before commit, just add the following lines to your <code>.pre-commit-config.yaml</code>:</p>
-<div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">repo</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">https://github.com/PabloRMira/sql_formatter</span>
-    <span class="nt">rev</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">master</span>
-    <span class="nt">hooks</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sql_formatter</span>
+<p>Add <code>ptypysql</code> as a hook to your <code>pre-commit</code> configuration to format your SQL files before commit, just add the following lines to your <code>.pre-commit-config.yaml</code>:</p>
+<div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/snapADDY/ptypysql</span><span class="w"></span>
+<span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span><span class="w"></span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ptypysql</span><span class="w"></span>
 </pre></div>
-<p>If you want to install <code>sql-formatter</code> locally and use that instead of using <code>pre-commit</code>'s default environment, set <code>repo: local</code> in your <code>.pre-commit-config.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">repo</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">local</span>
-    <span class="nt">hooks</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sql_formatter</span>
-      <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SQL formatter</span>
-      <span class="nt">language</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">system</span>
-      <span class="nt">entry</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sql-formatter</span>
-      <span class="nt">files</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">\.sql$</span>
+<p>If you want to install <code>ptypysql</code> locally and use that instead of using <code>pre-commit</code>'s default environment, set <code>repo: local</code> in your <code>.pre-commit-config.yaml</code> file:</p>
+<div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span><span class="w"></span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ptypysql</span><span class="w"></span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pretty Python SQL</span><span class="w"></span>
+<span class="w">      </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span><span class="w"></span>
+<span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ptypysql</span><span class="w"></span>
+<span class="w">      </span><span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\.py$</span><span class="w"></span>
 </pre></div>
 <p>or</p>
-<div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">repo</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">local</span>
-    <span class="nt">hooks</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sql_formatter</span>
-      <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SQL formatter</span>
-      <span class="nt">language</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">system</span>
-      <span class="nt">entry</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sql-formatter --max-line-length=50</span>
-      <span class="nt">files</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">\.sql$</span>
+<div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span><span class="w"></span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ptypysql</span><span class="w"></span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pretty Python SQL</span><span class="w"></span>
+<span class="w">      </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span><span class="w"></span>
+<span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ptypysql --max-line-length=50</span><span class="w"></span>
+<span class="w">      </span><span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\.py$</span><span class="w"></span>
 </pre></div>
 <p>for a custom maximum line length truncation of e.g. 50</p>
 
@@ -122,7 +116,7 @@ nb_path: "nbs/index.ipynb"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>To exemplify the formatting let's say you have a SQL query like this</p>
+<p>You can easily format the SQL string by:</p>
 
 </div>
 </div>
@@ -135,18 +129,11 @@ nb_path: "nbs/index.ipynb"
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">example_sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">create or replace table mytable as -- mytable example</span>
-<span class="s2">seLecT a.asdf, b.qwer, -- some comment here</span>
-<span class="s2">c.asdf, -- some comment there</span>
-<span class="s2">b.asdf2 frOm table1 as a leFt join </span>
-<span class="s2">table2 as b -- and here a comment</span>
-<span class="s2">    on a.asdf = b.asdf  -- join this way</span>
-<span class="s2">    inner join table3 as c</span>
-<span class="s2">on a.asdf=c.asdf</span>
-<span class="s2">whEre a.asdf= 1 -- comment this</span>
-<span class="s2">anD b.qwer =2 and a.asdf&lt;=1 --comment that</span>
-<span class="s2">or b.qwer&gt;=5</span>
-<span class="s2">groUp by a.asdf</span>
+<span class="s2">WITH days AS (SELECT generate_series(date_trunc(&#39;day&#39;, now()) - &#39;90 days&#39;::interval, date_trunc(&#39;day&#39;, now()), &#39;1 day&#39;::interval) AS day)</span>
+<span class="s2">select days.day as date, count(t1.id) count, count(t2.id) filter (where t2.id &lt; 500)</span>
+<span class="s2">from days full outer join (select * from t3 where accd between 1 and 64) t1 on t1.date = days.day</span>
+<span class="s2">natural left join t2 on t2.enddate = days.day</span>
+<span class="s2">group by days.day desc having days.day &gt; 100 order by days.day desc;</span>
 <span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
 
@@ -157,13 +144,6 @@ nb_path: "nbs/index.ipynb"
 </div>
     {% endraw %}
 
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Then you can use this package to format it so that it is better readable</p>
-
-</div>
-</div>
-</div>
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
@@ -171,7 +151,7 @@ nb_path: "nbs/index.ipynb"
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sql_formatter.core</span> <span class="kn">import</span> <span class="n">format_sql</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ptypysql.core</span> <span class="kn">import</span> <span class="n">format_sql</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">format_sql</span><span class="p">(</span><span class="n">example_sql</span><span class="p">))</span>
 </pre></div>
 
@@ -185,21 +165,30 @@ nb_path: "nbs/index.ipynb"
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>CREATE OR REPLACE TABLE mytable AS -- mytable example
-SELECT a.asdf,
-       b.qwer, -- some comment here
-       c.asdf, -- some comment there
-       b.asdf2
-FROM   table1 as a
-    LEFT JOIN table2 as b -- and here a comment
-        ON a.asdf = b.asdf -- join this way
-    INNER JOIN table3 as c
-        ON a.asdf = c.asdf
-WHERE  a.asdf = 1 -- comment this
-   and b.qwer = 2
-   and a.asdf &lt;= 1 --comment that
-    or b.qwer &gt;= 5
-GROUP BY a.asdf
+<pre>WITH days AS (
+    SELECT generate_series(
+        date_trunc(&#39;day&#39;, now()) - &#39;90 days&#39;::interval,
+        date_trunc(&#39;day&#39;, now()),
+        &#39;1 day&#39;::interval
+    ) AS day
+)
+SELECT days.day AS date,
+    count(t1.id) AS count,
+    count(t2.id) FILTER (
+        WHERE t2.id &lt; 500
+    )
+FROM days
+    FULL OUTER JOIN (
+        SELECT *
+        FROM t3
+        WHERE accd BETWEEN 1 AND 64
+    ) AS t1
+        ON t1.date = days.day
+    NATURAL LEFT JOIN t2
+        ON t2.enddate = days.day
+GROUP BY days.day DESC
+HAVING days.day &gt; 100
+ORDER BY days.day DESC;
 </pre>
 </div>
 </div>
@@ -212,7 +201,7 @@ GROUP BY a.asdf
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>It can even deal with subqueries and it will correct my favourite simple careless mistake (comma at the end of SELECT statement before of FROM) for you on the flow :-)</p>
+<p>You can also add <code>/*skip-formatter*/</code> to prevent from foramtting</p>
 
 </div>
 </div>
@@ -224,131 +213,15 @@ GROUP BY a.asdf
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">format_sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">select asdf, cast(qwer as numeric), -- some comment</span>
-<span class="s2">qwer1</span>
-<span class="s2">from </span>
-<span class="s2">(select asdf, qwer, from table1 where asdf = 1) as a</span>
-<span class="s2">left </span>
-<span class="s2">join (select asdf, qwer2 from table2 where qwer2 = 1) as b</span>
-<span class="s2">on a.asdf = b.asdf</span>
-<span class="s2">where qwer1 &gt;= 0</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>SELECT asdf,
-       cast(qwer as numeric), -- some comment
-       qwer1
-FROM   (SELECT asdf,
-               qwer
-        FROM   table1
-        WHERE  asdf = 1) as a
-    LEFT JOIN (SELECT asdf,
-                      qwer2
-               FROM   table2
-               WHERE  qwer2 = 1) as b
-        ON a.asdf = b.asdf
-WHERE  qwer1 &gt;= 0
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The formatter is also robust against nested subqueries</p>
-
-</div>
-</div>
-</div>
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">format_sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">select field1, field2 from (select field1, </span>
-<span class="s2">field2 from (select field1, field2, </span>
-<span class="s2">field3 from table1 where a=1 and b&gt;=100))</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>SELECT field1,
-       field2
-FROM   (SELECT field1,
-               field2
-        FROM   (SELECT field1,
-                       field2,
-                       field3
-                FROM   table1
-                WHERE  a = 1
-                   and b &gt;= 100))
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>If you do not want to get some query formatted in your SQL file then you can use the marker <code>/*skip-formatter*/</code> in your query to disable formatting for just the corresponding query</p>
-
-</div>
-</div>
-</div>
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sql_formatter.format_file</span> <span class="kn">import</span> <span class="n">format_sql_commands</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ptypysql.format_file</span> <span class="kn">import</span> <span class="n">format_sql_commands</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">format_sql_commands</span><span class="p">(</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">use database my_database;</span>
-
-<span class="sd">-- My first view --</span>
-<span class="sd">create or repLace view my_view as</span>
-<span class="sd">select asdf, qwer from table1</span>
-<span class="sd">where asdf &lt;= 10;</span>
-
-
 <span class="sd">/*skip-formatter*/</span>
-<span class="sd">create oR rePlace tabLe my_table as</span>
-<span class="sd">select asdf</span>
-<span class="sd">From my_view;</span>
+<span class="sd">WITH days AS (SELECT generate_series(date_trunc(&#39;day&#39;, now()) - &#39;90 days&#39;::interval, date_trunc(&#39;day&#39;, now()), &#39;1 day&#39;::interval) AS day)</span>
+<span class="sd">select days.day as date, count(t1.id) count, count(t2.id) filter (where t2.id &lt; 500) </span>
+<span class="sd">from days full outer join (select * from t3 where accd between 1 and 64) t1 on t1.date = days.day</span>
+<span class="sd">natural left join t2 on t2.enddate = days.day</span>
+<span class="sd">group by days.day desc having days.day &gt; 100 order by days.day desc;</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="p">))</span>
 </pre></div>
@@ -363,21 +236,12 @@ FROM   (SELECT field1,
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>use database my_database;
-
-
--- My first view --
-CREATE OR REPLACE VIEW my_view AS
-SELECT asdf,
-       qwer
-FROM   table1
-WHERE  asdf &lt;= 10;
-
-
-/*skip-formatter*/
-create oR rePlace tabLe my_table as
-select asdf
-From my_view;
+<pre>/*skip-formatter*/
+WITH days AS (SELECT generate_series(date_trunc(&#39;day&#39;, now()) - &#39;90 days&#39;::interval, date_trunc(&#39;day&#39;, now()), &#39;1 day&#39;::interval) AS day)
+select days.day as date, count(t1.id) count, count(t2.id) filter (where t2.id &lt; 500) 
+from days full outer join (select * from t3 where accd between 1 and 64) t1 on t1.date = days.day
+natural left join t2 on t2.enddate = days.day
+group by days.day desc having days.day &gt; 100 order by days.day desc;
 
 </pre>
 </div>
@@ -391,148 +255,20 @@ From my_view;
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="A-note-of-caution">A note of caution<a class="anchor-link" href="#A-note-of-caution"> </a></h3><p>For the SQL-formatter to work properly you should meticulously end each of your SQL statements with semicolon (;)</p>
-<p>However, we have equiped the <code>sql-formatter</code> with some basic validations:</p>
+<h2 id="Credit">Credit<a class="anchor-link" href="#Credit"> </a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This project makes use of and is based on:</p>
 <ul>
-<li><em>Forgotten semicolon validation</em>: The validator will check if the <code>CREATE</code> keyword appears more than twice, indicating the user that he / she may have forgotten a semicolon</li>
-<li><em>Unbalanced parenthesis</em>: The validator will check if there are unbalanced parenthesis in the query</li>
-<li><em>Unbalanced <code>case when ... end</code></em>: The validator will check if there are <code>case when</code> statements without <code>end</code> or vice versa</li>
+<li><a href="https://github.com/PabloRMira/sql_formatter">SQL-formatter</a></li>
 </ul>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="What-sql_formatter-does-not-do">What <code>sql_formatter</code> does not do<a class="anchor-link" href="#What-sql_formatter-does-not-do"> </a></h3><p>This package is just a SQL formatter and therefore</p>
-<ul>
-<li>cannot parse your SQL queries into e.g. dictionaries</li>
-<li>cannot validate your SQL queries to be valid for the corresponding database system / provider</li>
-</ul>
-<p>Up to now it only formats queries of the form</p>
-<ul>
-<li><code>CREATE TABLE / VIEW ...</code></li>
-<li><code>SELECT ...</code></li>
-</ul>
-<p>Every other SQL commands will remain unformatted, e.g. <code>INSERT INTO</code> ...</p>
+</div>
 
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Formatting-Logic">Formatting Logic<a class="anchor-link" href="#Formatting-Logic"> </a></h2><p>The main goal of the <code>sql_formatter</code> is to enhance readability and quick understanding of SQL queries via proper formatting. We use <strong>indentation</strong> and <strong>lowercasing / uppercasing</strong> as means to arrange statements / clauses and parameters into context. By <strong>programmatically standardizing</strong> the way to write SQL queries we help the user understand its queries faster.</p>
-<p>As a by-product of using the <code>sql_formatter</code>, developer teams can focus on the query logic itself and save time by not incurring into styling decisions, this then begin accomplished by the <code>sql_formatter</code>. This is similar to the goal accomplished by the <a href="https://github.com/psf/black">black package</a> for the Python language, which was also an inspiration for the development of this package for SQL.</p>
-<p>We can summarize the main steps of the formatter as follows:</p>
-<ol>
-<li>Each query is separated from above by two newlines.</li>
-<li>Everything but <strong>main statements* / clauses</strong> is lowercased</li>
-</ol>
-<p>* Main statements:</p>
-<ul>
-<li>CREATE ... TABLE / VIEW table_name AS</li>
-<li>SELECT (DISTINCT)</li>
-<li>FROM</li>
-<li>(LEFT / INNER / RIGHT / OUTER) JOIN</li>
-<li>UNION</li>
-<li>ON</li>
-<li>WHERE</li>
-<li>GROUP BY</li>
-<li>ORDER BY</li>
-<li>OVER</li>
-<li>PARTITION BY</li>
-</ul>
-<ol>
-<li>Indentation is used to put parameters into context. Here an easy example:</li>
-</ol>
-<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">field1</span><span class="p">,</span>
-       <span class="k">case</span> <span class="k">when</span> <span class="n">field2</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">and</span>
-                 <span class="n">field2</span> <span class="o">&lt;=</span> <span class="mi">10</span> <span class="k">and</span>
-                 <span class="n">field1</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span> <span class="k">then</span> <span class="mi">1</span>
-            <span class="k">else</span> <span class="mi">0</span> <span class="k">end</span> <span class="k">as</span> <span class="n">case_field</span><span class="p">,</span>
-       <span class="p">...</span>
-<span class="k">FROM</span>   <span class="n">table1</span>
-<span class="k">WHERE</span>  <span class="n">field1</span> <span class="o">=</span> <span class="mi">1</span>
-   <span class="k">and</span> <span class="n">field2</span> <span class="o">&lt;=</span> <span class="mi">2</span>
-    <span class="k">or</span> <span class="n">field3</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">field1</span><span class="p">;</span>
-</pre></div>
-<blockquote><p>This is a very nice, easy example but things can become more complicated if comments come into play</p>
-</blockquote>
-<ol>
-<li>Subqueries are also properly indented, e.g.</li>
-</ol>
-<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">a</span><span class="p">.</span><span class="n">field1</span><span class="p">,</span>
-       <span class="n">a</span><span class="p">.</span><span class="n">field2</span><span class="p">,</span>
-       <span class="n">b</span><span class="p">.</span><span class="n">field3</span>
-<span class="k">FROM</span>   <span class="p">(</span><span class="k">SELECT</span> <span class="n">field1</span><span class="p">,</span>
-               <span class="n">field2</span>
-        <span class="k">FROM</span>   <span class="n">table1</span>
-        <span class="k">WHERE</span>  <span class="n">field1</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">a</span>
-    <span class="k">LEFT</span> <span class="k">JOIN</span> <span class="p">(</span><span class="k">SELECT</span> <span class="n">field1</span><span class="p">,</span>
-                      <span class="n">field3</span>
-               <span class="k">FROM</span>   <span class="n">table2</span><span class="p">)</span> <span class="k">as</span> <span class="n">b</span>
-        <span class="k">ON</span> <span class="n">a</span><span class="p">.</span><span class="n">field1</span> <span class="o">=</span> <span class="n">b</span><span class="p">.</span><span class="n">field1</span><span class="p">;</span>
-</pre></div>
-<ol>
-<li>Everything not being a query of the form <code>CREATE ... TABLE / VIEW</code> or <code>SELECT ...</code> is left unchanged</li>
-</ol>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Versioning">Versioning<a class="anchor-link" href="#Versioning"> </a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We version our package via <a href="https://semver.org">semantic versioning</a>, i.e.,</p>
-<ul>
-<li>We use three digits separated by points x1.x2.x3, e.g. 0.5.1</li>
-<li>We increase x1 (the major version) if we introduce breaking changes<ul>
-<li>Exception: Versions with 0 at the beginning (e.g. 0.5.1) mean that the package is not stable yet and therefore every new feature could be a breaking change</li>
-</ul>
-</li>
-<li>We increase x2 (the minor version) if we introduce a new feature</li>
-<li>We increase x3 (the patch version) if we fix a bug</li>
-</ul>
-<p>New documentation, refactoring / maintenance of code and admin tasks do not change the versions.</p>
-<p>You can follow the changes introduced by each version in our <a href="https://github.com/PabloRMira/sql_formatter/blob/master/CHANGELOG.md">CHANGELOG</a></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="How-to-contribute">How to contribute<a class="anchor-link" href="#How-to-contribute"> </a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>See <a href="https://github.com/PabloRMira/sql_formatter/blob/master/CONTRIBUTING.md">CONTRIBUTING</a></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Acknowledgements">Acknowledgements<a class="anchor-link" href="#Acknowledgements"> </a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Thank you very much to Jeremy Howard and all the <a href="https://github.com/fastai/nbdev">nbdev</a> team for enabling the <em>fast</em> and delightful development of this library via the <code>nbdev</code> framework.</p>
-<p>For more details on <code>nbdev</code>, see its official <a href="https://nbdev.fast.ai/tutorial.html">tutorial</a></p>
-<p>Thank you very much for the developers of the <a href="https://github.com/psf/black">black</a> package, which was also an inspiration for the development of this package</p>
-
-</div>
-</div>
-</div>
-</div>
- 
 
