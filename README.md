@@ -2,8 +2,6 @@
 > A Python String SQL Formatter / Beautifier, built for PostgreSQL
 
 
-![CI](https://github.com/snapADDY/ptypysql/workflows/CI/badge.svg) [![PyPI](https://img.shields.io/pypi/v/ptypysql?color=yellow&label=pypi%20version)](https://pypi.org/project/ptypysql/#description)
-
 ## How to install
 
 Via pip

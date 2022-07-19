@@ -147,10 +147,3 @@ conda-recipe/*
 conda-bld/*
 
 test_sql/
-
-#doc related for conda
-docs/
-
-#Do not use old stuff
-Makefile
-.gh-release-config.yaml
