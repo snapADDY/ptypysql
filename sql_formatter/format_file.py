@@ -159,7 +159,8 @@ def format_sql_file(f, max_len=99):
             return 2
 
         else:
-            if sql_commands == formatted_file:
+            sql_commands_indented = "\n".join(sql_commands_split.removeprefix(indent) for sql_commands_split in sql_commands.split("\n"))
+            if sql_commands_indented == formatted_file:
                 exit_code += 0
             else:
                 exit_code = 1
@@ -182,8 +183,9 @@ def format_sql_file(f, max_len=99):
                     return 2
 
     # overwrite file
-    with open(f, "w") as file:
-        file.write(py_scripts)
+    if exit_code == 1:
+        with open(f, "w") as file:
+            file.write(py_scripts)
 
     return exit_code
 
