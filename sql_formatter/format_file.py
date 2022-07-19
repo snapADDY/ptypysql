@@ -14,7 +14,7 @@ from .utils import *
 from .validation import *
 
 # Cell
-def format_sql_commands(s, max_len=82):
+def format_sql_commands(s, max_len=99):
     "Format SQL commands in `s`. If SELECT line is longer than `max_len` then reformat line"
     s = s.strip()  # strip file contents
     split_s = split_by_semicolon(s)  # split by query
@@ -101,7 +101,7 @@ def format_sql_commands(s, max_len=82):
         return error_dict
 
 # Cell
-def format_sql_file(f, max_len=82):
+def format_sql_file(f, max_len=99):
     """Format file `f` with SQL commands and overwrite the file.
     If SELECT line is longer than 82 characters then reformat line
 
@@ -124,6 +124,9 @@ def format_sql_file(f, max_len=82):
     for sql in sqls:
         sql_function = sql.group()
         sql_commands = sql.group(1)
+        indent_length = len(sql_function) - len(sql_function.lstrip()) + 4
+        indent = " " * indent_length
+        max_len = max_len - indent_length
         # format SQL statements
         formatted_file = format_sql_commands(sql_commands, max_len=max_len)
         if isinstance(formatted_file, dict):
@@ -162,7 +165,6 @@ def format_sql_file(f, max_len=82):
                 exit_code = 1
                 # for safety
                 if sql_function in py_scripts and sql_commands in sql_function:
-                    indent = " " * (len(sql_function) - len(sql_function.lstrip()) + 4)
                     formatted_file = "\n".join([indent + s for s in formatted_file.split("\n")])
                     formatted_function = sql_heading.sub(r'\1' + f'\n{indent}"""\n', sql_function)
                     formatted_function = formatted_function.replace(sql_commands, formatted_file)
@@ -186,7 +188,7 @@ def format_sql_file(f, max_len=82):
     return exit_code
 
 # Cell
-def format_sql_files(files, recursive=False, max_len=82):
+def format_sql_files(files, recursive=False, max_len=99):
     "Format SQL `files`"
     exit_codes = []
     # if wildcard "*" is input then use it

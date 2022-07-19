@@ -5,8 +5,9 @@ __all__ = ['assert_and_print', 'compress_dicts', 'remove_whitespaces_newline', '
            'mark_ci_comments', 'mark_comments', 'split_query', 'split_apply_concat', 'split_comment_quote',
            'split_comment', 'identify_in_sql', 'split_by_semicolon', 'replace_newline_chars', 'sub_in_sql',
            'add_whitespaces_after_comma', 'identify_end_of_fields', 'add_newline_indentation', 'extract_outer_subquery',
-           'format_subquery', 'check_sql_query', 'check_skip_marker', 'identify_create_table_view', 'count_lines',
-           'find_line_number', 'disimilarity', 'assign_comment']
+           'format_subquery', 'extract_outer_subquery_too_long', 'format_subquery_too_long', 'check_sql_query',
+           'check_skip_marker', 'identify_create_table_view', 'count_lines', 'find_line_number', 'disimilarity',
+           'assign_comment']
 
 # Cell
 import re
@@ -626,6 +627,54 @@ def format_subquery(s, previous_s):
     else:
         indented_s = [indentation + line for line in s.split("\n")]
         formatted_s = "\n".join(indented_s)
+
+    # add new line and indentation before the end of the ")"
+    formatted_s = re.sub(r"\s*(\))$", "\n" + " " * last_line_indent + r"\1", formatted_s)
+    return formatted_s
+
+# Cell
+def extract_outer_subquery_too_long(s, max_len=99):
+    "Extract outer subquery in query `li`"
+    # only process if the line is longer than max_len
+    first_line = s.split("\n")[0]
+    if len(first_line) > max_len and "(" in first_line:
+        # initialize container for subquery positions
+        # in string `s`
+        subquery_pos = []
+        # auxiliar indicator to get the subquery right
+        # counter for parenthesis
+        k = -1
+        # counter for '
+        d = 0
+        # loop over string characters
+        for i, c in enumerate(s):
+            if c == "(" and k == -1 and d%2 == 0: # The first (
+                subquery_pos.append(i)
+                k += 1
+            elif c == "(" and d%2 == 0:
+                k += 1
+            elif c == ")" and k == 0 and d%2 == 0: # end position for subquery
+                subquery_pos.append(i)
+                return subquery_pos
+            elif c == ")" and k > 0:
+                k -= 1
+            elif c == "," and k == 0 and d%2 == 0:
+                subquery_pos.append(i)
+            elif c == "'":
+                d += 1
+
+# Cell
+def format_subquery_too_long(s, previous_s):
+    "Format subquery in line `s` based on indentation on `previous_s`"
+    # get reference line for the indentation level
+    # and remove whitespaces from the left
+    last_line = previous_s.strip("\n").split("\n")[-1]
+    last_line_indent = len(last_line) - len(last_line.lstrip())
+
+    #split into main string and substring
+    indented_s = [" " * 4 + line for line in s.split("\n")]
+    indented_s[0] = " " * last_line_indent + indented_s[0]
+    formatted_s = "\n".join(indented_s)
 
     # add new line and indentation before the end of the ")"
     formatted_s = re.sub(r"\s*(\))$", "\n" + " " * last_line_indent + r"\1", formatted_s)

@@ -2,9 +2,9 @@
 
 __all__ = ['MAIN_STATEMENTS', 'CAP_STATEMENTS', 'clean_query', 'preformat_statements', 'lowercase_query',
            'add_whitespaces_query', 'format_partition_by', 'remove_wrong_end_comma', 'format_case_when',
-           'reformat_too_long_line', 'format_select', 'format_from', 'format_join', 'format_on', 'format_where',
-           'format_filter_where', 'format_statement_line', 'format_statements', 'format_multiline_comments',
-           'add_semicolon', 'format_simple_sql', 'format_sql']
+           'format_select', 'format_from', 'format_join', 'format_on', 'format_on', 'format_where',
+           'format_filter_where', 'format_statement_line', 'format_statements', 'add_join_as',
+           'format_multiline_comments', 'add_semicolon', 'format_simple_sql', 'format_sql']
 
 # Cell
 import re
@@ -18,17 +18,7 @@ MAIN_STATEMENTS = [
     "select distinct",
     "select",
     "from",
-    "natural left join",
-    "natural right join",
-    "natural inner join",
-    "natural join",
-    "left join",
-    "right join",
-    "inner join",
-    "full outer join",
-    "full join",
-    "cross join",
-    "join",
+    "(?:natural\s|full\s)?(?:left\s|right\s|inner\s|outer\s|cross\s)?join",
     "union",
     "intersect",
     "on",
@@ -145,11 +135,11 @@ def preformat_statements(s):
             non_select_region_re = re.compile(rf"\s*\b({statement})\b", flags=re.I)
             select_region_statement_re = re.compile(rf"\b({statement})\b", flags=re.I)
             split_s = [{
-                "string": non_select_region_re.sub("\n" + statement.upper(), sdict["string"])
+                "string": non_select_region_re.sub(lambda x: "\n" + x.group(1).upper(), sdict["string"])
                     if not sdict["comment"] and not sdict["select"]  # no comment, no select region
-                    else non_select_region_re.sub("\n" + statement.upper(), sdict["string"])
+                    else non_select_region_re.sub(lambda x: "\n" + x.group(1).upper(), sdict["string"])
                     if not sdict["comment"] and sdict["select"] and select_re.match(statement) # no comment, select region and select statement
-                    else select_region_statement_re.sub(statement.upper(), sdict["string"])
+                    else select_region_statement_re.sub(lambda x: x.group(1).upper(), sdict["string"])
                     if not sdict["comment"] and sdict["select"] and not select_re.match(statement) # no comment, select region and no select statement
                     else sdict["string"],
                 "comment": sdict["comment"],
@@ -206,22 +196,22 @@ def format_partition_by(s, base_indentation):
     split_s = [sp for sp in split_s if sp != ""]
     begin_s = split_s[0]
     partition_by = split_s[1]
-    indentation = base_indentation + len(begin_s) + 13
+    indentation = base_indentation + 8
     # add newline after each comma (no comments) and indentation
     partition_by = add_newline_indentation(partition_by, indentation=indentation)
     # add new line and indentation after order by
     if orderby_involved:
         partition_by = "".join([partition_by, " "] + split_s[2:])
     partition_by = re.sub(
-        r"\s(order by.*)", "\n" + " " * (base_indentation + len(begin_s)) + r"\1",
+        r"\s(order by.*)", "\n" + " " * (base_indentation + 4) + r"\1",
         partition_by,
         flags=re.I
     )
     # combine begin of string with formatted partition by
-    s = begin_s + partition_by
+    s = begin_s + "\n" + (base_indentation + 4) * " " + partition_by
     s = s.strip()
     # add newline and indentation before the last bracket
-    s = re.sub(r"(\)\s*(?:as\s*)*[^\s\)]+)$", "\n" + " " * base_indentation + r"\1", s)
+    s = re.sub(r"(\)\s*(?:as\s*)*[^\s\)]+)$", "\n" + " " * base_indentation + r"\1", s, flags=re.I)
     return s
 
 # Cell
@@ -249,115 +239,46 @@ def remove_wrong_end_comma(split_s):
     return split_s_out
 
 # Cell
-def format_case_when(s):
+def format_case_when(s, max_len=99):
     "Format case when statement in line `s`"
     # compile regex
     when_else_re = re.compile(r"(?<!case) ((?:when|else).*?)", flags=re.I)
     case_and_or = re.compile(r"\b((?:and|or))\b", flags=re.I)
+    case_then = re.compile(r"\b(then)\b", flags=re.I)
+    case_end = re.compile(r"\b(end)\b", flags=re.I)
+    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     # prepare string
     s_strip = s.strip()
     field_indentation = len(s) - len(s_strip)
-    case_when_indentation = identify_in_sql("case when", s_strip)[0]
     split_s = split_comment_quote(s)
     for d in split_s:
         if not d["quote"]:  # assumed no comments given by select function
-            d["string"] = when_else_re.sub( # + 5 = len(case )
-                r"\n" + " " * (field_indentation + case_when_indentation + 5) + r"\1",
+            d["string"] = when_else_re.sub(
+                r"\n" + " " * (field_indentation + 4) + r"\1",
                 d["string"]
             )
-            d["string"] = case_and_or.sub( # + 9 = len(case when )
-                r"\1\n" + " " * (field_indentation + case_when_indentation + 9),
+            # if len(d["string"]) + field_indentation + 10 > max_len: # 10 for "case when "
+            #     d["string"] = case_and_or.sub(
+            #         "\n" + " " * (field_indentation + 8) + r"\1",
+            #         d["string"]
+            #     )
+            d["string"] = case_then.sub(
+                "\n" + " " * (field_indentation + 4) + r"\1",
                 d["string"]
             )
-    s_out = "".join([d["string"] for d in split_s])
-    return s_out
+            d["string"] = case_end.sub("\n" + " " * field_indentation + r"\1", d["string"])
+
+    s_code = "".join([d["string"] for d in split_s])
+    s_code = "\n".join([case_and_or.sub("\n" + " " * (field_indentation + 8) + r"\1", sp) if len(sp) > max_len else sp for sp in s_code.split("\n")])
+    s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
+    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
+                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
+
+    return s_code
 
 # Cell
-def reformat_too_long_line(li, max_len=82):
-    "Reformat too long line `li` if it is longer than `max_len` characters after stripping"
-    if len(li.strip()) > max_len:
-        function_re = re.compile("[\w\d]+\(")
-        if function_re.search(li):
-            out_list = []
-            in_function = False  # indicator for reformatting line with function
-            k = 0  # counter for parenthesis
-            j = 0  # indicator for string position
-            quote_open1 = False  # quote '
-            quote_open2 = False # quote "
-            first_append = True
-            for i, s in enumerate(li):
-                if function_re.match(li[i-1:i+1]) and not quote_open1 and not quote_open2 and not in_function:
-                    in_function = True
-                    indentation = i+1
-                elif s == "(" and not quote_open1 and not quote_open2 and in_function:
-                    k += 1
-                elif s == ")" and not quote_open1 and not quote_open2 and in_function:
-                    k -= 1
-                elif k == -1:
-                    in_function = False
-                elif s == "," and in_function and not quote_open1 and not quote_open2 and k == 0:
-                    if first_append:
-                        out_list.append(li[j:i+1].rstrip())
-                        first_append = False
-                    else:
-                        out_list.append(li[j:i+1].strip())
-                    j = i + 1
-                elif s == "'" and not quote_open1 and not quote_open2:
-                    quote_open1 = True
-                elif s == "'" and quote_open1 and not quote_open2:
-                    quote_open1 = False
-                elif s == '"' and not quote_open1 and not quote_open2:
-                    quote_open2 = True
-                elif s == '"' and not quote_open1 and quote_open2:
-                    quote_open2 = False
-            out_list.append(li[j:].strip())
-            if len(out_list) > 1:
-                join_str = "\n" + " " * indentation
-                li = join_str.join(out_list)
-        elif "in (" in li.lower():
-            out_list = []
-            in_in = False
-            j = 0  # indicator for string position
-            quote_open1 = False  # quote '
-            quote_open2 = False # quote "
-            first_append = True
-            lcol = 0  # line code column
-            for i, s in enumerate(li):
-                if "in (" in li[i-3:i+1].lower() and not quote_open1 and not quote_open2 and not in_in:
-                    in_in = True
-                    indentation = i + 1
-                elif s == ")" and not quote_open1 and not quote_open2 and in_in:
-                    in_in = False
-                elif s == "," and in_in and not quote_open1 and not quote_open2:
-                    line_chunk = li[j:i+1]
-                    lcol = len(line_chunk.strip()) + indentation
-                    if first_append:
-                        lcol = len(line_chunk.strip())
-                        if lcol >= max_len:
-                            out_list.append(line_chunk.rstrip())
-                            first_append = False
-                            j = i + 1
-                    else:
-                        lcol = len(line_chunk.strip()) + indentation
-                        if lcol >= max_len:
-                            out_list.append(line_chunk.strip())
-                            j = i + 1
-                elif s == "'" and not quote_open1 and not quote_open2:
-                    quote_open1 = True
-                elif s == "'" and quote_open1 and not quote_open2:
-                    quote_open1 = False
-                elif s == '"' and not quote_open1 and not quote_open2:
-                    quote_open2 = True
-                elif s == '"' and not quote_open1 and quote_open2:
-                    quote_open2 = False
-            out_list.append(li[j:].strip())
-            if len(out_list) > 1:
-                join_str = "\n" + " " * indentation
-                li = join_str.join(out_list)
-    return li
-
-# Cell
-def format_select(s, max_len=82):
+def format_select(s, max_len=99):
     "Format SELECT statement line `s`. If line is longer than `max_len` then reformat line"
     # remove [C] at end of SELECT
     s = re.sub(r"\[C\]$", "", s)
@@ -367,7 +288,7 @@ def format_select(s, max_len=82):
     # check whether there is a SELECT DISTINCT in the code (not comments, not text in quotes)
     s_code = "".join([d["string"] for d in split_s if not d["comment"] and not d["quote"]])
     # save the correct indentation: 16 for select distinct, 7 for only select
-    indentation = 16 if re.search("^select distinct", s_code, flags=re.I) else 7
+    indentation = 4
     # get only comment / non-comment
     split_comment = compress_dicts(split_s, ["comment"])
     # add newline after each comma and indentation (this is robust against quotes by construction)
@@ -377,11 +298,15 @@ def format_select(s, max_len=82):
     split_s = s.split("\n")
     # format case when
     split_s = [
-        format_case_when(sp)
+        format_case_when(sp, max_len)
         if identify_in_sql("case when", sp) != []
         else sp
         for sp in split_s
     ]
+    # add AS if missing
+    as_regex = re.compile(r"(\)(?<!\bAS\b)\s?|\w(?<!\bSELECT\b)(?<!\bSELECT DISTINCT\b)(?<!\bAS\b)\s)(\w+|\'.+\')(,?)$", flags=re.I)
+    split_s = [as_regex.sub(lambda x: x.group(1).rstrip() + " AS " + x.group(2) + x.group(3), sp)
+               for sp in split_s]
     # join by newline
     s = "\n".join(split_s)
     # format PARTITION BY
@@ -394,10 +319,12 @@ def format_select(s, max_len=82):
         for line in split_s
     ]
     s = begin_s + ("\n" + (" " * indentation)).join(split_s)
-    s = "\n".join([
-        reformat_too_long_line(li, max_len=max_len)
-        for li in s.split("\n")
-    ])
+
+    # depreciated: used to reformat too long line in select only, and cannot handle too long subquery
+    # s = "\n".join([
+    #     reformat_too_long_line(li, max_len=max_len)
+    #     for li in s.split("\n")
+    # ])
     # get comments and preceding string (non-comment)
     comment_dicts = []
     for i, d in enumerate(split_comment):
@@ -410,49 +337,61 @@ def format_select(s, max_len=82):
 # Cell
 def format_from(s, **kwargs):
     "Format FROM statement line `s`"
-    s = re.sub(  # add indentation
-        r"(from )(.*)",
-        r"\1  \2",
-        s,
-        flags=re.I
-    )
+    split_s = split_comment_quote(s)
+    split_comment = compress_dicts(split_s, ["comment"])
+    # define regex before loop
+    indentation = 4
+    s = add_newline_indentation("".join([d["string"] for d in split_s if not d["comment"]]),
+                                indentation=indentation)
+    split_s = s.split("\n")
+    # add AS if no AS exists but with custom name
+    as_regex = re.compile(r"(\)(?<!\bAS\b)\s?|\w(?<!\bFROM\b)(?<!\bAS\b)\s)(\w+|\'.+\')(,?)$", flags=re.I)
+    split_s = [as_regex.sub(lambda x: x.group(1).rstrip() + " AS " + x.group(2) + x.group(3), sp)
+               for sp in split_s]
+    s = "\n".join(split_s)
+
+    comment_dicts = []
+    for i, d in enumerate(split_comment):
+        if d["comment"]:
+            comment_dicts.append({"comment": d["string"], "preceding": split_comment[i-1]["string"]})
+    # assign comments to text
+    s = assign_comment(s, comment_dicts)
     return s
 
 # Cell
 def format_join(s, **kwargs):
     "Format JOIN statement line `s`"
     s = re.sub(  # add indentation
-        r"^(\w*)\s?(\w*)\s?(join )(.*)",
-        lambda x: (f"{x.group(1)} {x.group(2)}\n" if x.group(2) else (f"{x.group(1)}\n" if x.group(1) else "")) + x.group(3) + x.group(4),
+        r"\b((?:natural\s|full\s)?(?:left\s|right\s|inner\s|outer\s|cross\s)?join)\b",
+        r"    \1",
         s,
         flags=re.I
     )
     return s
 
 # Cell
-def format_on(s, **kwargs):
+def format_on(s, max_len = 82):
     "Format ON statement line `s`"
-    s = "    " + s  # add indentation
+    indentation = 8
+    s = " " * indentation + s  # add indentation
     split_s = split_comment_quote(s)
     # define regex before loop
-    indent_and = re.compile(r"\s*\b(and)\b", flags=re.I)
-    indent_or = re.compile(r"\s*\b(or)\b", flags=re.I)
-    indent_between_and = re.compile(r"((?=and|or|on).*?)(between)([\s\S]*?)(and)", flags=re.I)
+    indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
+    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     for d in split_s:
         if not d["comment"] and not d["quote"]:
             s_aux = d["string"]
-            s_aux = indent_and.sub(lambda x: "\n" + " " * 3 + x.group(1), s_aux)  # add newline and indentation for and
-            s_aux = indent_or.sub(lambda x: "\n" + " " * 4 + x.group(1), s_aux)  # add newline and indentation for or
+            s_aux = indent_and_or.sub(lambda x: "\n" + " " * 8 + x.group(1), s_aux)  # add newline and indentation for and ,or
             d["string"] = s_aux
     # get split comment / non comment
     split_comment = compress_dicts(split_s, ["comment"])
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
-    # add newline and indentation for between_and (experimental)
-    s_code = indent_between_and.sub(
-            lambda x: x.group(1) + x.group(2) + x.group(3) + " " * (
-                (4 if x.group(1).startswith("AND") else 5) + len(x.group(1))
-                ) + x.group(4) ,
-            s_code)
+    # add newline and indentation for between_and (experimental) if too long
+    s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
+    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
+                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
+
     # strip lines of code from the right
     s_code = "\n".join([sp.rstrip() for sp in s_code.split("\n")])
     # get comments and preceding string (non-comment)
@@ -465,30 +404,62 @@ def format_on(s, **kwargs):
     return s
 
 # Cell
-def format_where(s, **kwargs):
+def format_on(s, max_len = 82):
+    "Format ON statement line `s`"
+    indentation = 8
+    s = " " * indentation + s  # add indentation
+    split_s = split_comment_quote(s)
+    # define regex before loop
+    indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
+    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
+    for d in split_s:
+        if not d["comment"] and not d["quote"]:
+            s_aux = d["string"]
+            s_aux = indent_and_or.sub(lambda x: "\n" + " " * 8 + x.group(1), s_aux)  # add newline and indentation for and ,or
+            d["string"] = s_aux
+    # get split comment / non comment
+    split_comment = compress_dicts(split_s, ["comment"])
+    s_code = "".join([d["string"] for d in split_s if not d["comment"]])
+    # add newline and indentation for between_and (experimental) if too long
+    s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
+    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
+                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
+
+    # strip lines of code from the right
+    s_code = "\n".join([sp.rstrip() for sp in s_code.split("\n")])
+    # get comments and preceding string (non-comment)
+    comment_dicts = []
+    for i, d in enumerate(split_comment):
+        if d["comment"]:
+            comment_dicts.append({"comment": d["string"], "preceding": split_comment[i-1]["string"]})
+    # assign comments to text
+    s = assign_comment(s_code, comment_dicts)
+    return s
+
+# Cell
+def format_where(s, max_len = 82):
     "Format WHERE statement line `s`"
     #s = re.sub(r"(where )", r"\1 ", s, flags=re.I)  # add indentation after WHERE
     # split by comment / non comment, quote / non-quote
     split_s = split_comment_quote(s)
     # define regex before loop
-    indent_and = re.compile(r"\s*\b(and)\b", flags=re.I)
-    indent_or = re.compile(r"\s*\b(or)\b", flags=re.I)
-    indent_between_and = re.compile(r"((?=and|or|where).*?)(between)([\s\S]*?)(and)", flags=re.I)
+    indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
+    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     for d in split_s:
         if not d["comment"] and not d["quote"]:
             s_aux = d["string"]
-            s_aux = indent_and.sub("\n" + " " * 2 + r"\1", s_aux)  # add newline and indentation for and
-            s_aux = indent_or.sub("\n" + " " * 3 + r"\1", s_aux)  # add newline and indentation for or
+            s_aux = indent_and_or.sub(lambda x: "\n" + " " * 4 + x.group(1), s_aux)  # add newline and indentation for and ,or
             d["string"] = s_aux
     # get split comment / non comment
     split_comment = compress_dicts(split_s, ["comment"])
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
-    # add newline and indentation for between_and (experimental)
-    s_code = indent_between_and.sub(
-            lambda x: x.group(1) + x.group(2) + x.group(3) + " " * (
-                    (4 if x.group(1).startswith("AND") else (5 if x.group(1).startswith("OR") else 1)) + len(x.group(1))
-                    ) + x.group(4),
-            s_code)
+    # add newline and indentation for between_and (experimental) if too long
+    s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
+    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 8 + r"\3", sp)
+                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
+
     # strip from the right each code line
     s_code = "\n".join([sp.rstrip() for sp in s_code.split("\n")])
     # get comments and preceding string (non-comment)
@@ -503,7 +474,7 @@ def format_where(s, **kwargs):
 # Cell
 def format_filter_where(s, **kwargs):
     "Format WHERE statement line `s`"
-    s = re.sub(r"(filter)\s+\((where)\s+", r"\1 (\n\2 ", s, flags=re.I)  # add indentation after WHERE
+    s = re.sub(r"(filter)\s+\((where)\s+", r"\1 ", s, flags=re.I)  # add indentation after WHERE
     return s
 
 # Cell
@@ -511,7 +482,7 @@ def format_statement_line(s, **kwargs):
     "Format statement line `s`"
     statement_funcs = {
         r"^select": format_select,
-        # r"^from": format_from,
+        r"^from": format_from,
         r"^\w*\s?\w*\s?join": format_join,
         r"^on": format_on,
         r"filter \(where": format_filter_where,
@@ -532,6 +503,12 @@ def format_statements(s, **kwargs):
     ]
     formatted_s = "\n".join(formatted_lines)
     return formatted_s
+
+# Cell
+def add_join_as(s, **kwargs):
+    as_on_regex = re.compile(r"(\)(?<!\bAS\b)\s?|\w(?<!\bAS\b)\s)(\w+|\'.+\')(\s+\bON\b)")
+    s = as_on_regex.sub(lambda x: x.group(1).rstrip() + " AS " + x.group(2) + x.group(3), s)
+    return s
 
 # Cell
 def format_multiline_comments(s):
@@ -562,12 +539,13 @@ def add_semicolon(s):
     return "\n".join(split_s)
 
 # Cell
-def format_simple_sql(s, semicolon=False, max_len=82):
+def format_simple_sql(s, semicolon=False, max_len=99):
     "Format a simple SQL query without subqueries `s`"
     s = lowercase_query(s)  # everything lowercased but not the comments
     s = preformat_statements(s)  # add breaklines for the main statements
     s = add_whitespaces_query(s)  # add whitespaces between symbols in query
     s = format_statements(s, max_len=max_len)  # format statements
+    s = add_join_as(s) # special handling for JOIN ... AS ... ON
     s = re.sub(r"\[C\]", "", s)  # replace remaining [C]
     s = re.sub(r"\[CS\]", "\n", s)  # replace remaining [CS]
     s = re.sub(r"\s+\n", "\n", s)  # replace redundant whitespaces before newline
@@ -578,7 +556,7 @@ def format_simple_sql(s, semicolon=False, max_len=82):
     return s
 
 # Cell
-def format_sql(s, semicolon=False, max_len=82):
+def format_sql(s, semicolon=False, max_len=99):
     "Format SQL query with subqueries `s`"
     s = format_simple_sql(s, semicolon=semicolon, max_len=max_len)  # basic query formatting
     # get first outer subquery positions
@@ -598,4 +576,36 @@ def format_sql(s, semicolon=False, max_len=82):
 
         # get first outer subquery positions
         subquery_pos = extract_outer_subquery(s)
+
+    # format too long string
+    split_s = split_comment_quote(s)
+    split_comment = compress_dicts(split_s, ["comment"])
+
+    # separate comment and the code since the length of comment is not considered
+    s_code = "".join([d["string"] for d in split_s if not d["comment"]])
+    s_code = s_code.split("\n")
+
+    # loop for each line, reformat it if it is too long
+    s_id = 0
+    while s_id < len(s_code):
+        sp = s_code[s_id]
+        if len(sp) > max_len:
+            sp_code = "\n".join(s_code[s_id:])
+            if split_index := extract_outer_subquery_too_long(sp_code, max_len):
+                zip_split = zip([-1] + split_index, split_index + [len(s)])
+                ss = [sp_code[i+1:j+1] for i,j in zip_split]
+                for i in range(1, len(ss) - 1):
+                    ss[i] = "\n" + format_subquery_too_long(ss[i].strip(), ss[0])
+                sp_code = "".join(ss)
+                s_code = s_code[:s_id] + sp_code.split("\n")
+
+        s_id += 1
+
+    s_code = "\n".join([ss.rstrip() for ss in s_code])
+    comment_dicts = []
+    for i, d in enumerate(split_comment):
+        if d["comment"]:
+            comment_dicts.append({"comment": d["string"], "preceding": split_comment[i-1]["string"]})
+    # assign comments to text
+    s = assign_comment(s_code, comment_dicts)
     return s
