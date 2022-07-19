@@ -126,9 +126,9 @@ def format_sql_file(f, max_len=99):
         sql_commands = sql.group(1)
         indent_length = len(sql_function) - len(sql_function.lstrip()) + 4
         indent = " " * indent_length
-        max_len = max_len - indent_length
+        max_len_with_indent = max_len - indent_length
         # format SQL statements
-        formatted_file = format_sql_commands(sql_commands, max_len=max_len)
+        formatted_file = format_sql_commands(sql_commands, max_len=max_len_with_indent)
         if isinstance(formatted_file, dict):
             print(f"Something went wrong in file: {f}")
             if "semicolon" in formatted_file.keys():
@@ -225,7 +225,7 @@ def format_sql_files_cli():
         "--max-line-length",
         help="Maximum line length for trunction of SELECT fields",
         type=int,
-        default=82
+        default=99
     )
     parser.add_argument(
         "-v",

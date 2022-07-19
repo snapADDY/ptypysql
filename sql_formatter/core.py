@@ -584,7 +584,6 @@ def format_sql(s, semicolon=False, max_len=99):
     # separate comment and the code since the length of comment is not considered
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
     s_code = s_code.split("\n")
-
     # loop for each line, reformat it if it is too long
     s_id = 0
     while s_id < len(s_code):
