@@ -14,7 +14,7 @@ from .utils import *
 from .validation import *
 
 # Cell
-def format_sql_commands(s, max_len=99):
+def format_sql_commands(s, max_len=99, semicolon = True):
     "Format SQL commands in `s`. If SELECT line is longer than `max_len` then reformat line"
     s = s.strip()  # strip file contents
     split_s = split_by_semicolon(s)  # split by query
@@ -41,7 +41,7 @@ def format_sql_commands(s, max_len=99):
             else:
                 split_s2 = [sp]
             formatted_split_s2 = [
-                "\n\n\n" + format_sql(sp, semicolon=True, max_len=max_len).strip()
+                "\n\n\n" + format_sql(sp, semicolon=semicolon, max_len=max_len).strip()
                 if check_sql_query(sp) and not check_skip_marker(sp)
                 else sp
                 for sp in split_s2
@@ -118,7 +118,7 @@ def format_sql_file(f, max_len=99):
 
     # use for python
     # TODO: support for custom SQL string searching
-    sql_regex = re.compile(r'.+DB\.(?:fetch|execute)(?:\_\w+)?\(\s*\"\"\"\s*(?:--sql)?\s*([\s\S]+?)\"\"\"')
+    sql_regex = re.compile(r'.+DB\.(?:fetch|execute)(?:\_\w+)?\(\s*\"\"\"\s*(?:--sql)?\s*([\s\S]+?)\"\"\"\,?')
     sql_heading = re.compile(r'(DB\.(?:fetch|execute)(?:\_\w+)?\()(\s*\"\"\"\s*(?:--sql)?\s*)')
     sqls = sql_regex.finditer(py_scripts)
     for sql in sqls:
@@ -127,8 +127,11 @@ def format_sql_file(f, max_len=99):
         indent_length = len(sql_function) - len(sql_function.lstrip()) + 4
         indent = " " * indent_length
         max_len_with_indent = max_len - indent_length
-        # format SQL statements
-        formatted_file = format_sql_commands(sql_commands, max_len=max_len_with_indent)
+        # format SQL statements, and only add semicolon if SQL input of the function is finished, i.e., get ","
+        if sql_function.endswith(','):
+            formatted_file = format_sql_commands(sql_commands, max_len=max_len_with_indent, semicolon = True)
+        else:
+            formatted_file = format_sql_commands(sql_commands, max_len=max_len_with_indent, semicolon = False)
         if isinstance(formatted_file, dict):
             print(f"Something went wrong in file: {f}")
             if "semicolon" in formatted_file.keys():
