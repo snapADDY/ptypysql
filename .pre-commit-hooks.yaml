@@ -2,5 +2,5 @@
   name: Pretty Python SQL
   entry: ptypysql
   language: python
-  types: [file, py]
+  types_or: [python, pyi]
   require_serial: true
