@@ -6,7 +6,7 @@ authors = ["adam444555 <a473489548@gmail.com>"]
 license = "apache2"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.7"
 
 [tool.poetry.dev-dependencies]
 notebook = "^6.4.12"
