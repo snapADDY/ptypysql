@@ -7,7 +7,7 @@ __all__ = ['assert_and_print', 'compress_dicts', 'remove_whitespaces_newline', '
            'add_whitespaces_after_comma', 'identify_end_of_fields', 'add_newline_indentation', 'extract_outer_subquery',
            'format_subquery', 'extract_outer_subquery_too_long', 'format_subquery_too_long', 'check_sql_query',
            'check_skip_marker', 'identify_create_table_view', 'count_lines', 'find_line_number', 'disimilarity',
-           'assign_comment']
+           'assign_comment', 'remove_prefix']
 
 # Cell
 import re
@@ -773,3 +773,9 @@ def assign_comment(fs, cds):
         )
     s_out = "\n".join(fsplit_s_out)
     return s_out
+
+# Cell
+def remove_prefix(text, prefix):
+    if text.startswith(prefix):
+        return text[len(prefix):]
+    return text

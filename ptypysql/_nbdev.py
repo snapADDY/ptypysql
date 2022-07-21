@@ -59,6 +59,7 @@ index = {"MAIN_STATEMENTS": "00_core.ipynb",
          "find_line_number": "02_utils.ipynb",
          "disimilarity": "02_utils.ipynb",
          "assign_comment": "02_utils.ipynb",
+         "remove_prefix": "02_utils.ipynb",
          "validate_semicolon": "03_validation.ipynb",
          "validate_balanced_parenthesis": "03_validation.ipynb",
          "validate_case_when": "03_validation.ipynb"}

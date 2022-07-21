@@ -162,7 +162,7 @@ def format_sql_file(f, max_len=99):
             return 2
 
         else:
-            sql_commands_indented = "\n".join(sql_commands_split.removeprefix(indent) for sql_commands_split in sql_commands.split("\n"))
+            sql_commands_indented = "\n".join(remove_prefix(sql_commands_split, indent) for sql_commands_split in sql_commands.split("\n"))
             if sql_commands_indented == formatted_file:
                 exit_code += 0
             else:
