@@ -3,6 +3,6 @@ repos:
     hooks:
     - id: ptypysql
       name: Pretty Python SQL
-      language: system
-      entry: ptypysql
+      language: python
+      entry: python -m ptypysql
       files: \.py$
