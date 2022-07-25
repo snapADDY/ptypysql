@@ -1,6 +1,6 @@
 - id: ptypysql
   name: Pretty Python SQL
-  entry: ptypysql
+  entry: python -m ptypysql
   language: python
   types_or: [python, pyi]
   require_serial: true
