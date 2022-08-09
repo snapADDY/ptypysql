@@ -10,7 +10,7 @@ python = "^3.7"
 
 [tool.poetry.dev-dependencies]
 notebook = "^6.4.12"
-nbdev = "^1.2.11"
+nbdev = "1.2.11"
 Jinja2 = "<3.1"
 
 [build-system]
