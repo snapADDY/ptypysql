@@ -246,8 +246,8 @@ def format_case_when(s, max_len=99):
     case_and_or = re.compile(r"\b((?:and|or))\b", flags=re.I)
     case_then = re.compile(r"\b(then)\b", flags=re.I)
     case_end = re.compile(r"\b(end)\b", flags=re.I)
-    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
-    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
+    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(.*?)\s+(\band\b)", flags=re.I)
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
     # prepare string
     s_strip = s.strip()
     field_indentation = len(s) - len(s_strip)
@@ -401,8 +401,8 @@ def format_on(s, max_len = 99):
     split_s = split_comment_quote(s)
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
-    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
+    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(.*?)\s+(\band\b)", flags=re.I)
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
     for d in split_s:
         if not d["comment"] and not d["quote"]:
             s_aux = d["string"]
@@ -459,8 +459,8 @@ def format_where(s, max_len = 99):
     split_s = split_comment_quote(s)
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
-    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
+    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(.*?)\s+(\band\b)", flags=re.I)
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
     for d in split_s:
         if not d["comment"] and not d["quote"]:
             s_aux = d["string"]
@@ -500,7 +500,6 @@ def format_where(s, max_len = 99):
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 8 + r"\3", sp)
                         if len(sp) > max_len else sp for sp in s_code.split("\n")])
-
 
     # strip from the right each code line
     s_code = "\n".join([sp.rstrip() for sp in s_code.split("\n")])
