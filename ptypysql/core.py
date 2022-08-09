@@ -2,9 +2,9 @@
 
 __all__ = ['MAIN_STATEMENTS', 'CAP_STATEMENTS', 'clean_query', 'preformat_statements', 'lowercase_query',
            'add_whitespaces_query', 'format_partition_by', 'remove_wrong_end_comma', 'format_case_when',
-           'format_select', 'format_from', 'format_join', 'format_on', 'format_on', 'format_where',
-           'format_filter_where', 'format_statement_line', 'format_statements', 'add_join_as',
-           'format_multiline_comments', 'add_semicolon', 'format_simple_sql', 'format_sql']
+           'format_select', 'format_from', 'format_join', 'format_on', 'format_where', 'format_filter_where',
+           'format_statement_line', 'format_statements', 'add_join_as', 'format_multiline_comments', 'add_semicolon',
+           'format_simple_sql', 'format_sql']
 
 # Cell
 import re
@@ -246,7 +246,6 @@ def format_case_when(s, max_len=99):
     case_and_or = re.compile(r"\b((?:and|or))\b", flags=re.I)
     case_then = re.compile(r"\b(then)\b", flags=re.I)
     case_end = re.compile(r"\b(end)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\([^\)\(]*?)\s*(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
     indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     # prepare string
@@ -272,8 +271,29 @@ def format_case_when(s, max_len=99):
 
     s_code = "".join([d["string"] for d in split_s])
     s_code = "\n".join([case_and_or.sub("\n" + " " * (field_indentation + 8) + r"\1", sp) if len(sp) > max_len else sp for sp in s_code.split("\n")])
-        # add more newline for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
+
+    # search for and/or within parentheses
+    # counter for parenthesis
+    k = 0
+    # counter for '
+    d = 0
+    # loop over string characters
+    and_or_position = []
+    for i, c in enumerate(s_code):
+        if c == "(" and d%2 == 0: # The first (
+            k += 1
+        elif c == ")" and k > 0 and d%2 == 0:
+            k -= 1
+        elif s_code[i:i+3] == "AND" and k > 0 and d%2 == 0:
+            and_or_position.append(i)
+        elif s_code[i:i+2] == "OR" and k > 0 and d%2 == 0:
+            and_or_position.append(i)
+        elif c == "'":
+            d += 1
+    # remove linebreak starting from the end (index problem)
+    for i in and_or_position[::-1]:
+        s_code = s_code[:i-5] + s_code[i-1:]
+
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
                         if len(sp) > max_len else sp for sp in s_code.split("\n")])
@@ -381,7 +401,6 @@ def format_on(s, max_len = 99):
     split_s = split_comment_quote(s)
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\([^\)\(]*?)\s*(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
     indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     for d in split_s:
@@ -393,46 +412,29 @@ def format_on(s, max_len = 99):
     split_comment = compress_dicts(split_s, ["comment"])
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
 
-    # add more newline for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
+    # search for and/or within parentheses
+    # counter for parenthesis
+    k = 0
+    # counter for '
+    d = 0
+    # loop over string characters
+    and_or_position = []
+    for i, c in enumerate(s_code):
+        if c == "(" and d%2 == 0: # The first (
+            k += 1
+        elif c == ")" and k > 0 and d%2 == 0:
+            k -= 1
+        elif s_code[i:i+3] == "AND" and k > 0 and d%2 == 0:
+            and_or_position.append(i)
+        elif s_code[i:i+2] == "OR" and k > 0 and d%2 == 0:
+            and_or_position.append(i)
+        elif c == "'":
+            d += 1
+    # remove linebreak starting from the end (index problem)
+    for i in and_or_position[::-1]:
+        s_code = s_code[:i-5] + s_code[i-1:]
 
-    # add newline and indentation for between_and (experimental) if too long
-    s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
-    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
-                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
 
-    # strip lines of code from the right
-    s_code = "\n".join([sp.rstrip() for sp in s_code.split("\n")])
-    # get comments and preceding string (non-comment)
-    comment_dicts = []
-    for i, d in enumerate(split_comment):
-        if d["comment"]:
-            comment_dicts.append({"comment": d["string"], "preceding": split_comment[i-1]["string"]})
-    # assign comments to text
-    s = assign_comment(s_code, comment_dicts)
-    return s
-
-# Cell
-def format_on(s, max_len = 99):
-    "Format ON statement line `s`"
-    indentation = 8
-    s = " " * indentation + s  # add indentation
-    split_s = split_comment_quote(s)
-    # define regex before loop
-    indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\([^\)\(]*?)\s*(and|or)\b", flags=re.I)
-    indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
-    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
-    for d in split_s:
-        if not d["comment"] and not d["quote"]:
-            s_aux = d["string"]
-            s_aux = indent_and_or.sub(lambda x: "\n" + " " * 8 + x.group(1), s_aux)  # add newline and indentation for and ,or
-            d["string"] = s_aux
-    # get split comment / non comment
-    split_comment = compress_dicts(split_s, ["comment"])
-    s_code = "".join([d["string"] for d in split_s if not d["comment"]])
-    # add more newline for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
     # add newline and indentation for between_and (experimental) if too long
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
@@ -457,7 +459,6 @@ def format_where(s, max_len = 99):
     split_s = split_comment_quote(s)
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\((?!\s*where)[^\)\(]*?)\s*(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
     indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     for d in split_s:
@@ -469,8 +470,31 @@ def format_where(s, max_len = 99):
     split_comment = compress_dicts(split_s, ["comment"])
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
 
-    # replace newline by space for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
+    # search for and/or within parentheses
+    # counter for parenthesis
+    k = 0
+    s_val = 0
+    if re.search(r"filter \(\s*where", s_code, flags=re.I):
+        k = -1
+        s_val = -1
+    # counter for '
+    d = 0
+    # loop over string characters
+    and_or_position = []
+    for i, c in enumerate(s_code):
+        if c == "(" and d%2 == 0: # The first (
+            k += 1
+        elif c == ")" and k > s_val and d%2 == 0:
+            k -= 1
+        elif s_code[i:i+3] == "AND" and k > 0 and d%2 == 0:
+            and_or_position.append(i)
+        elif s_code[i:i+2] == "OR" and k > 0 and d%2 == 0:
+            and_or_position.append(i)
+        elif c == "'":
+            d += 1
+    # remove linebreak starting from the end (index problem)
+    for i in and_or_position[::-1]:
+        s_code = s_code[:i-5] + s_code[i-1:]
 
     # add newline and indentation for between_and (experimental) if too long
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
