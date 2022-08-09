@@ -656,7 +656,7 @@ def extract_outer_subquery_too_long(s, max_len=99):
             elif c == ")" and k == 0 and d%2 == 0: # end position for subquery
                 subquery_pos.append(i)
                 return subquery_pos
-            elif c == ")" and k > 0:
+            elif c == ")" and k > 0 and d%2 == 0:
                 k -= 1
             elif c == "," and k == 0 and d%2 == 0:
                 subquery_pos.append(i)
@@ -668,7 +668,7 @@ def extract_outer_subquery_too_long(s, max_len=99):
                 d += 1
 
 # Cell
-def format_subquery_too_long(s, previous_s):
+def format_subquery_too_long(s, previous_s, is_end):
     "Format subquery in line `s` based on indentation on `previous_s`"
     # get reference line for the indentation level
     # and remove whitespaces from the left
@@ -681,7 +681,8 @@ def format_subquery_too_long(s, previous_s):
     formatted_s = "\n".join(indented_s)
 
     # add new line and indentation before the end of the ")"
-    formatted_s = re.sub(r"\s*(\))$", "\n" + " " * last_line_indent + r"\1", formatted_s)
+    if is_end:
+        formatted_s = re.sub(r"\s*(\))$", "\n" + " " * last_line_indent + r"\1", formatted_s)
     return formatted_s
 
 # Cell

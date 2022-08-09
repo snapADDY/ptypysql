@@ -636,7 +636,7 @@ def format_sql(s, semicolon=False, max_len=99):
                 zip_split = zip([-1] + split_index, split_index + [len(s)])
                 ss = [sp_code[i+1:j+1] for i,j in zip_split]
                 for i in range(1, len(ss) - 1):
-                    ss[i] = "\n" + format_subquery_too_long(ss[i].strip(), ss[0])
+                    ss[i] = "\n" + format_subquery_too_long(ss[i].strip(), ss[0], is_end = (i == len(ss) - 2))
                 sp_code = "".join(ss)
                 s_code = s_code[:s_id] + sp_code.split("\n")
 
