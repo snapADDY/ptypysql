@@ -1131,6 +1131,12 @@ FROM table1
 </div>
     {% endraw %}
 
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="substring-from-case">substring from case<a class="anchor-link" href="#substring-from-case"> </a></h2>
+</div>
+</div>
+</div>
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
@@ -1138,7 +1144,21 @@ FROM table1
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">preformat_statements</span><span class="p">(</span><span class="n">example_sql</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">assert_and_print</span><span class="p">(</span>
+    <span class="n">preformat_statements</span><span class="p">(</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">create or replace transient table  my_table as -- mytable</span>
+<span class="sd">select distinct asdf, qwer, -- some comment</span>
+<span class="sd">from table1 t1 join table2 t2 as t1.tset = substring(t2.tses from &#39;\w+$&#39;)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">),</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">CREATE OR REPLACE TRANSIENT TABLE my_table AS -- mytable[C]</span>
+<span class="sd">SELECT DISTINCT asdf, qwer, -- some comment[C]</span>
+<span class="sd">FROM table1 t1</span>
+<span class="sd">JOIN table2 t2 AS t1.tset = substring(t2.tses from &#39;\w+$&#39;)</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="p">)</span>
 </pre></div>
 
     </div>
@@ -1151,15 +1171,10 @@ FROM table1
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>CREATE OR REPLACE TABLE mytable AS -- Mytable example[C][CS]/* multi line[CI]comment */[C]
-SELECT a.asdf,[CS]-- some line comment[C]b.qwer, -- some comment here[C][CS]/* and here is a line comment inside select */[C]substr(c.asdf, 1, 2) AS substr_asdf,[CS]/* some commenT[CI]there */[C]CASE WHEN a.asdf= 1 THEN &#39;b&#39; /* here a case comment */[C]WHEN b.qwer =2 THEN &#39;c&#39; ELSE &#39;d&#39; END AS new_field, -- Some comment[C][CS]/* and here some inline comment */[C]b.asdf2
-FROM table1 AS a
-LEFT JOIN table2 AS b -- and here a comment[C]
-ON a.asdf = b.asdf /* joiN this way */[C]
-INNER JOIN table3 AS c
-ON a.asdf=c.asdf AND a.qwer= b.qwer
-WHERE a.asdf= 1 -- comment this[C]AND b.qwer =2 AND a.asdf&lt;=1 --comment that[C]OR b.qwer&gt;=5
-GROUP BY a.asdf
+<pre>CREATE OR REPLACE TRANSIENT TABLE my_table AS -- mytable[C]
+SELECT DISTINCT asdf, qwer, -- some comment[C]
+FROM table1 t1
+JOIN table2 t2 AS t1.tset = substring(t2.tses from &#39;\w+$&#39;)
 </pre>
 </div>
 </div>
@@ -4052,6 +4067,12 @@ where asdf = 1 and qwer = 2
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="SUBSTRING-...-FROM-(special-case-for-FROM)">SUBSTRING ... FROM (special case for FROM)<a class="anchor-link" href="#SUBSTRING-...-FROM-(special-case-for-FROM)"> </a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="JOIN-(LEFT/RIGHT/etc.)">JOIN (LEFT/RIGHT/etc.)<a class="anchor-link" href="#JOIN-(LEFT/RIGHT/etc.)"> </a></h3>
 </div>
 </div>
@@ -4517,6 +4538,39 @@ where asdf = 1 and qwer = 2
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">test</span> <span class="o">=</span> <span class="s2">&quot;WHERE act.activity IN :activity_names AND act.created BETWEEN :start_date AND (:end_date)::date + &#39;23:59:59.999999&#39;::time&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">format_where</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>WHERE act.activity IN :activity_names
+    AND act.created BETWEEN :start_date AND (:end_date)::date + &#39;23:59:59.999999&#39;::time
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
 <div class="output">
@@ -4575,6 +4629,56 @@ where asdf = 1 and qwer = 2
 <pre>WHERE asdf = 1 -- and some comment
     and qwer = 1
     or blabla = &#39;asdf&#39;
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">assert_and_print</span><span class="p">(</span>
+    <span class="n">format_where</span><span class="p">(</span>
+        <span class="s2">&quot;WHERE (activity = &#39;DEEPINTEGRATION_UPDATER_MERGE_VIEW_SAVE&#39;) AND (act.organization_id = 1 OR usr.username NOT LIKE &#39;%@snapaddy.com&#39;) AND (act.payload -&gt; &#39;meta&#39; -&gt;&gt; &#39;savedFieldCount&#39; IS NOT NULL) AND created BETWEEN :start_date AND :end_date OR (:excluded_orga_id IS NULL AND act.organization_id &lt;&gt; :excluded_orga_id);&quot;</span>
+    <span class="p">),</span> 
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">WHERE (activity = &#39;DEEPINTEGRATION_UPDATER_MERGE_VIEW_SAVE&#39;)</span>
+<span class="sd">    AND (act.organization_id = 1</span>
+<span class="sd">        OR usr.username NOT LIKE &#39;%@snapaddy.com&#39;)</span>
+<span class="sd">    AND (act.payload -&gt; &#39;meta&#39; -&gt;&gt; &#39;savedFieldCount&#39; IS NOT NULL)</span>
+<span class="sd">    AND created BETWEEN :start_date AND :end_date</span>
+<span class="sd">    OR (:excluded_orga_id IS NULL</span>
+<span class="sd">        AND act.organization_id &lt;&gt; :excluded_orga_id);</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>WHERE (activity = &#39;DEEPINTEGRATION_UPDATER_MERGE_VIEW_SAVE&#39;)
+    AND (act.organization_id = 1
+        OR usr.username NOT LIKE &#39;%@snapaddy.com&#39;)
+    AND (act.payload -&gt; &#39;meta&#39; -&gt;&gt; &#39;savedFieldCount&#39; IS NOT NULL)
+    AND created BETWEEN :start_date AND :end_date
+    OR (:excluded_orga_id IS NULL
+        AND act.organization_id &lt;&gt; :excluded_orga_id);
 </pre>
 </div>
 </div>
@@ -6190,6 +6294,53 @@ FROM table1
 </pre></div>
 
     </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>WITH days AS (
+    SELECT generate_series(:start_date, :end_date, &#39;1 day&#39;::interval) AS day
+)
+SELECT days.day,
+    count(*) FILTER (
+        WHERE job.state = &#39;completed&#39;
+    ) AS completed_jobs_count,
+    count(*) FILTER (
+        WHERE job.state = &#39;failed&#39;
+    ) AS failed_jobs_count,
+    coalesce(sum((job.return_value -&gt;&gt; &#39;successRows&#39;)::int) FILTER (
+        WHERE job.state = &#39;completed&#39;
+    ), 0) AS completed_rows_count,
+    coalesce(
+        sum(
+            (job.return_value -&gt;&gt; &#39;totalRows&#39;)::int - (job.return_value -&gt;&gt; &#39;successRows&#39;)::int
+        ) FILTER (
+            WHERE job.state = &#39;completed&#39;
+        ),
+        0
+    ) AS failed_rows_count
+FROM days
+    LEFT JOIN (
+        SELECT state,
+            return_value,
+            created_at
+        FROM analytics_job
+        WHERE type = &#39;data_enrichment&#39;
+            AND data -&gt;&gt; &#39;strategy&#39; = &#39;EMAIL_FINDER&#39;
+            AND created_at BETWEEN :start_date AND (:end_date)::date + &#39;23:59:59.999999&#39;::time
+    ) AS job
+        ON date_trunc(&#39;day&#39;, job.created_at) = days.day
+GROUP BY 1
+ORDER BY days.day DESC;
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 

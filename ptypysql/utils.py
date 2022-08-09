@@ -776,6 +776,10 @@ def assign_comment(fs, cds):
 
 # Cell
 def remove_prefix(text, prefix):
+    """Remove prefix of a string
+
+    Same behavior as removeprefix() in py3.9+. Compatible for python version < 3.9
+    """
     if text.startswith(prefix):
         return text[len(prefix):]
     return text

@@ -78,7 +78,7 @@ for a custom maximum line length truncation of e.g. 50
 
 ### Usage in Python
 
-You can easily format the SQL string by:
+You can easily format the SQL string with two parameters to set the maximum line length and add semicolon by:
 
 ```python
 example_sql = """
@@ -86,13 +86,13 @@ WITH days AS (SELECT generate_series(date_trunc('day', now()) - '90 days'::inter
 select days.day as date, count(t1.id) count, count(t2.id) filter (where t2.id < 500)
 from days full outer join (select * from t3 where accd between 1 and 64) t1 on t1.date = days.day
 natural left join t2 on t2.enddate = days.day
-group by days.day desc having days.day > 100 order by days.day desc;
+group by days.day desc having days.day > 100 order by days.day desc
 """
 ```
 
 ```python
 from ptypysql.core import format_sql
-print(format_sql(example_sql))
+print(format_sql(example_sql, max_len=99, semicolon=True))
 ```
 
     WITH days AS (

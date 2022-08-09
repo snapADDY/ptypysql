@@ -124,28 +124,29 @@ nb_path: "nbs/01_format_file.ipynb"
 
 <span class="s2">CREATE OR REPLACE VIEW first_view AS -- my first view</span>
 <span class="s2">SELECT a.car_id,</span>
-<span class="s2">       b.car_name,</span>
-<span class="s2">       sum(a.price) OVER (PARTITION BY b.car_name</span>
-<span class="s2">                          ORDER BY a.car_id) AS sum_price,</span>
-<span class="s2">       a.price</span>
-<span class="s2">FROM   sales AS a</span>
-<span class="s2">LEFT</span>
-<span class="s2">JOIN   (</span>
-<span class="s2">    SELECT car_id,</span>
-<span class="s2">           car_name</span>
-<span class="s2">    FROM   cars</span>
-<span class="s2">) AS b</span>
-<span class="s2">    ON a.car_id = b.car_id</span>
-<span class="s2">WHERE  car_id &gt; 1</span>
-<span class="s2">   AND car_id &lt;= 100</span>
+<span class="s2">    b.car_name,</span>
+<span class="s2">    sum(a.price) OVER (</span>
+<span class="s2">        PARTITION BY b.car_name</span>
+<span class="s2">        ORDER BY a.car_id</span>
+<span class="s2">    ) AS sum_price,</span>
+<span class="s2">    a.price</span>
+<span class="s2">FROM sales AS a</span>
+<span class="s2">    LEFT JOIN (</span>
+<span class="s2">        SELECT car_id,</span>
+<span class="s2">            car_name</span>
+<span class="s2">        FROM cars</span>
+<span class="s2">    ) AS b</span>
+<span class="s2">        ON a.car_id = b.car_id</span>
+<span class="s2">WHERE car_id &gt; 1</span>
+<span class="s2">    AND car_id &lt;= 100</span>
 <span class="s2">ORDER BY b.car_name;</span>
 
 
 <span class="s2">-- Table no. 1 --</span>
-<span class="s2">CREATE OR REPLACE TABLE first_table AS -- my first table</span>
+<span class="s2">CREATE OR REPLACE TABLE first_table AS</span>
 <span class="s2">SELECT car_id,</span>
-<span class="s2">       avg(price) AS avg_price</span>
-<span class="s2">FROM   first_view</span>
+<span class="s2">    avg(price) AS avg_price -- my first table</span>
+<span class="s2">FROM first_view</span>
 <span class="s2">GROUP BY car_id</span>
 <span class="s2">ORDER BY car_id;</span>
 
@@ -196,7 +197,7 @@ test_script.py</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="format_sql_commands" class="doc_header"><code>format_sql_commands</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L17" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_commands</code>(<strong><code>s</code></strong>, <strong><code>max_len</code></strong>=<em><code>99</code></em>)</p>
+<h4 id="format_sql_commands" class="doc_header"><code>format_sql_commands</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L17" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_commands</code>(<strong><code>s</code></strong>, <strong><code>max_len</code></strong>=<em><code>99</code></em>, <strong><code>semicolon</code></strong>=<em><code>True</code></em>)</p>
 </blockquote>
 <p>Format SQL commands in <code>s</code>. If SELECT line is longer than <code>max_len</code> then reformat line</p>
 
@@ -254,28 +255,29 @@ use schema my_schema;
 
 CREATE OR REPLACE VIEW first_view AS -- my first view
 SELECT a.car_id,
-       b.car_name,
-       sum(a.price) OVER (PARTITION BY b.car_name
-                          ORDER BY a.car_id) AS sum_price,
-       a.price
-FROM   sales AS a
-LEFT
-JOIN   (
-    SELECT car_id,
-           car_name
-    FROM   cars
-) AS b
-    ON a.car_id = b.car_id
-WHERE  car_id &gt; 1
-   AND car_id &lt;= 100
+    b.car_name,
+    sum(a.price) OVER (
+        PARTITION BY b.car_name
+        ORDER BY a.car_id
+    ) AS sum_price,
+    a.price
+FROM sales AS a
+    LEFT JOIN (
+        SELECT car_id,
+            car_name
+        FROM cars
+    ) AS b
+        ON a.car_id = b.car_id
+WHERE car_id &gt; 1
+    AND car_id &lt;= 100
 ORDER BY b.car_name;
 
 
 -- Table no. 1 --
-CREATE OR REPLACE TABLE first_table AS -- my first table
+CREATE OR REPLACE TABLE first_table AS
 SELECT car_id,
-       avg(price) AS avg_price
-FROM   first_view
+    avg(price) AS avg_price -- my first table
+FROM first_view
 GROUP BY car_id
 ORDER BY car_id;
 
@@ -329,8 +331,8 @@ ORDER BY car_id;
 
 <span class="sd">CREATE OR REPLACE TABLE my_table AS</span>
 <span class="sd">SELECT asdf,</span>
-<span class="sd">       qwer</span>
-<span class="sd">FROM   table2</span>
+<span class="sd">    qwer</span>
+<span class="sd">FROM table2</span>
 <span class="sd">GROUP BY asdf;</span>
 <span class="sd">&quot;&quot;&quot;</span><span class="p">)</span>
 </pre></div>
@@ -355,8 +357,8 @@ from table1;
 
 CREATE OR REPLACE TABLE my_table AS
 SELECT asdf,
-       qwer
-FROM   table2
+    qwer
+FROM table2
 GROUP BY asdf;
 
 </pre>
@@ -386,8 +388,8 @@ GROUP BY asdf;
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">CREATE OR REPLACE TABLE my_table AS</span>
 <span class="sd">SELECT asdf,</span>
-<span class="sd">       qwer</span>
-<span class="sd">FROM   table2</span>
+<span class="sd">    qwer</span>
+<span class="sd">FROM table2</span>
 <span class="sd">GROUP BY asdf;</span>
 <span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
 </pre></div>
@@ -404,8 +406,8 @@ GROUP BY asdf;
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>CREATE OR REPLACE TABLE my_table AS
 SELECT asdf,
-       qwer
-FROM   table2
+    qwer
+FROM table2
 GROUP BY asdf;
 
 </pre>
@@ -425,43 +427,24 @@ GROUP BY asdf;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">assert_and_print</span><span class="p">(</span>
-    <span class="n">format_sql_commands</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">create or replace table my_table As</span>
-<span class="s2">Select asdf, qwer</span>
-<span class="s2">From table2</span>
-<span class="s2">group by asdf -- some comment</span>
-<span class="s2">;</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">),</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">CREATE OR REPLACE TABLE my_table AS</span>
-<span class="sd">SELECT asdf,</span>
-<span class="sd">       qwer</span>
-<span class="sd">FROM   table2</span>
-<span class="sd">GROUP BY asdf; -- some comment</span>
-<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># assert_and_print(</span>
+<span class="c1">#     format_sql_commands(&quot;&quot;&quot;</span>
+<span class="c1"># create or replace table my_table As</span>
+<span class="c1"># Select asdf, qwer</span>
+<span class="c1"># From table2</span>
+<span class="c1"># group by asdf -- some comment</span>
+<span class="c1"># ;</span>
+<span class="c1"># &quot;&quot;&quot;),</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1"># CREATE OR REPLACE TABLE my_table AS </span>
+<span class="c1"># SELECT asdf,</span>
+<span class="c1">#     qwer</span>
+<span class="c1"># FROM table2</span>
+<span class="c1"># GROUP BY asdf; -- some comment</span>
+<span class="c1"># &quot;&quot;&quot;.lstrip())</span>
 </pre></div>
 
     </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>CREATE OR REPLACE TABLE my_table AS
-SELECT asdf,
-       qwer
-FROM   table2
-GROUP BY asdf; -- some comment
-
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -475,62 +458,37 @@ GROUP BY asdf; -- some comment
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">assert_and_print</span><span class="p">(</span>
-    <span class="n">format_sql_commands</span><span class="p">(</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">create table my_table As</span>
-<span class="sd">select asdf, Qwer, /* ; */</span>
-<span class="sd">qwer2, -- ;</span>
-<span class="sd">replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4</span>
-<span class="sd">from table1; /* Some comment */</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># assert_and_print(</span>
+<span class="c1">#     format_sql_commands(</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="c1"># create table my_table As</span>
+<span class="c1"># select asdf, Qwer, /* ; */</span>
+<span class="c1"># qwer2, -- ;</span>
+<span class="c1"># replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4</span>
+<span class="c1"># from table1; /* Some comment */</span>
 
-<span class="sd">create view my_view As</span>
-<span class="sd">Select asdf</span>
-<span class="sd">From my_table; /* Another comment */</span>
-<span class="sd">&quot;&quot;&quot;</span>
-    <span class="p">),</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">CREATE TABLE my_table AS</span>
-<span class="sd">SELECT asdf,</span>
-<span class="sd">       qwer, /* ; */</span>
-<span class="sd">       qwer2, -- ;</span>
-<span class="sd">       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4</span>
-<span class="sd">FROM   table1; /* Some comment */</span>
+<span class="c1"># create view my_view As</span>
+<span class="c1"># Select asdf</span>
+<span class="c1"># From my_table; /* Another comment */</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="c1">#     ),</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="c1"># CREATE TABLE my_table AS</span>
+<span class="c1"># SELECT asdf,</span>
+<span class="c1">#        qwer, /* ; */</span>
+<span class="c1">#        qwer2, -- ;</span>
+<span class="c1">#        replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4</span>
+<span class="c1"># FROM   table1; /* Some comment */</span>
 
 
-<span class="sd">CREATE VIEW my_view AS</span>
-<span class="sd">SELECT asdf</span>
-<span class="sd">FROM   my_table; /* Another comment */</span>
-<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-<span class="p">)</span>
+<span class="c1"># CREATE VIEW my_view AS</span>
+<span class="c1"># SELECT asdf</span>
+<span class="c1"># FROM   my_table; /* Another comment */</span>
+<span class="c1"># &quot;&quot;&quot;.lstrip()</span>
+<span class="c1"># )</span>
 </pre></div>
 
     </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>CREATE TABLE my_table AS
-SELECT asdf,
-       qwer, /* ; */
-       qwer2, -- ;
-       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4
-FROM   table1; /* Some comment */
-
-
-CREATE VIEW my_view AS
-SELECT asdf
-FROM   my_table; /* Another comment */
-
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -544,62 +502,37 @@ FROM   my_table; /* Another comment */
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">assert_and_print</span><span class="p">(</span>
-    <span class="n">format_sql_commands</span><span class="p">(</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">create or replace transient table my_table As</span>
-<span class="sd">select asdf, Qwer, /* ; */</span>
-<span class="sd">qwer2, -- ;</span>
-<span class="sd">replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4</span>
-<span class="sd">from table1;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># assert_and_print(</span>
+<span class="c1">#     format_sql_commands(</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="c1"># create or replace transient table my_table As</span>
+<span class="c1"># select asdf, Qwer, /* ; */</span>
+<span class="c1"># qwer2, -- ;</span>
+<span class="c1"># replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4</span>
+<span class="c1"># from table1;</span>
 
-<span class="sd">create view my_view As</span>
-<span class="sd">Select asdf</span>
-<span class="sd">From my_table;</span>
-<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-    <span class="p">),</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">CREATE OR REPLACE TRANSIENT TABLE my_table AS</span>
-<span class="sd">SELECT asdf,</span>
-<span class="sd">       qwer, /* ; */</span>
-<span class="sd">       qwer2, -- ;</span>
-<span class="sd">       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4</span>
-<span class="sd">FROM   table1;</span>
+<span class="c1"># create view my_view As</span>
+<span class="c1"># Select asdf</span>
+<span class="c1"># From my_table;</span>
+<span class="c1"># &quot;&quot;&quot;.lstrip()</span>
+<span class="c1">#     ),</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="c1"># CREATE OR REPLACE TRANSIENT TABLE my_table AS</span>
+<span class="c1"># SELECT asdf,</span>
+<span class="c1">#        qwer, /* ; */</span>
+<span class="c1">#        qwer2, -- ;</span>
+<span class="c1">#        replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4</span>
+<span class="c1"># FROM   table1;</span>
 
 
-<span class="sd">CREATE VIEW my_view AS</span>
-<span class="sd">SELECT asdf</span>
-<span class="sd">FROM   my_table;</span>
-<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-<span class="p">)</span>
+<span class="c1"># CREATE VIEW my_view AS</span>
+<span class="c1"># SELECT asdf</span>
+<span class="c1"># FROM   my_table;</span>
+<span class="c1"># &quot;&quot;&quot;.lstrip()</span>
+<span class="c1"># )</span>
 </pre></div>
 
     </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>CREATE OR REPLACE TRANSIENT TABLE my_table AS
-SELECT asdf,
-       qwer, /* ; */
-       qwer2, -- ;
-       replace(&#39;;&#39;, &#39;&#39;, qwer3) AS qwer4
-FROM   table1;
-
-
-CREATE VIEW my_view AS
-SELECT asdf
-FROM   my_table;
-
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -873,276 +806,6 @@ If SELECT line is longer than 82 characters then reformat line</p>
 </div>
     {% endraw %}
 
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sql_file</span><span class="p">)</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">format_sql_file</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">formatted_file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="n">assert_and_print</span><span class="p">(</span>
-    <span class="n">formatted_file</span><span class="p">,</span>
-    <span class="n">expected_sql_file</span>
-<span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>82
---- Views for some nice data mart ---
-use database my_database;
-use schema my_schema;
-
-
-CREATE OR REPLACE VIEW first_view AS -- my first view
-SELECT a.car_id,
-       b.car_name,
-       sum(a.price) OVER (PARTITION BY b.car_name
-                          ORDER BY a.car_id) as sum_price,
-       a.price
-FROM   sales as a
-    LEFT JOIN (SELECT car_id,
-                      car_name
-               FROM   cars) as b
-        ON a.car_id = b.car_id
-WHERE  car_id &gt; 1
-   and car_id &lt;= 100
-ORDER BY b.car_name;
-
-
--- Table no. 1 --
-CREATE OR REPLACE TABLE first_table AS -- my first table
-SELECT car_id,
-       avg(price) as avg_price
-FROM   first_view
-GROUP BY car_id
-ORDER BY car_id;
-
---- End of file ---
-
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sql_forgotten_semicolon</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">create or replace transient table my_table As</span>
-<span class="s2">select asdf, Qwer, /* ; */</span>
-<span class="s2">qwer2, -- ;</span>
-<span class="s2">replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4</span>
-<span class="s2">from table1</span>
-
-<span class="s2">create view my_view As</span>
-<span class="s2">Select asdf</span>
-<span class="s2">From my_table;</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sql_forgotten_semicolon</span><span class="p">)</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">exit_code</span> <span class="o">=</span> <span class="n">format_sql_file</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">formatted_file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="n">assert_and_print</span><span class="p">(</span> <span class="c1"># no formatting</span>
-    <span class="n">formatted_file</span><span class="p">,</span>
-    <span class="n">sql_forgotten_semicolon</span>
-<span class="p">)</span>
-<span class="k">assert</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">2</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-Something went wrong in file: /tmp/tmp2qgedw93
-[WARNING] Identified CREATE keyword more than twice within the same query at lines [(1, 7)]
-You may have forgotten a semicolon (;) to delimit the queries
-Aborting formatting for file /tmp/tmp2qgedw93
-Aborting formatting for file /tmp/tmp2qgedw93
-create or replace transient table my_table As
-select asdf, Qwer, /* ; */
-qwer2, -- ;
-replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4
-from table1
-
-create view my_view As
-Select asdf
-From my_table;
-
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sql_forgotten_semicolon</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">create or replace transient table my_table As</span>
-<span class="s2">select asdf, Qwer, /* ; */</span>
-<span class="s2">(qwer2, -- ;</span>
-<span class="s2">replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4</span>
-<span class="s2">from table1;</span>
-
-<span class="s2">create view my_view As</span>
-<span class="s2">(Select asdf</span>
-<span class="s2">From my_table;</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sql_forgotten_semicolon</span><span class="p">)</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">exit_code</span> <span class="o">=</span> <span class="n">format_sql_file</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">formatted_file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="n">assert_and_print</span><span class="p">(</span> <span class="c1"># no formatting</span>
-    <span class="n">formatted_file</span><span class="p">,</span>
-    <span class="n">sql_forgotten_semicolon</span>
-<span class="p">)</span>
-<span class="k">assert</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">2</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-Something went wrong in file: /tmp/tmp5rkzfb24
-[WARNING] Identified unbalanced parenthesis at lines [[3], [8]]
-You should check your parenthesis
-Aborting formatting for file /tmp/tmp5rkzfb24
-Aborting formatting for file /tmp/tmp5rkzfb24
-create or replace transient table my_table As
-select asdf, Qwer, /* ; */
-(qwer2, -- ;
-replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4
-from table1;
-
-create view my_view As
-(Select asdf
-From my_table;
-
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sql_forgotten_semicolon</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">create or replace transient table my_table As</span>
-<span class="s2">select asdf, Qwer, /* ; */</span>
-<span class="s2">(qwer2, -- ;</span>
-<span class="s2">replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4</span>
-<span class="s2">from table1</span>
-
-<span class="s2">create view my_view As</span>
-<span class="s2">(Select asdf</span>
-<span class="s2">From my_table;</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sql_forgotten_semicolon</span><span class="p">)</span>
-    <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">exit_code</span> <span class="o">=</span> <span class="n">format_sql_file</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">formatted_file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="n">assert_and_print</span><span class="p">(</span> <span class="c1"># no formatting</span>
-    <span class="n">formatted_file</span><span class="p">,</span>
-    <span class="n">sql_forgotten_semicolon</span>
-<span class="p">)</span>
-<span class="k">assert</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">2</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-Something went wrong in file: /tmp/tmpzf3rofts
-[WARNING] Identified CREATE keyword more than twice within the same query at lines [(1, 7)]
-You may have forgotten a semicolon (;) to delimit the queries
-[WARNING] Identified unbalanced parenthesis at lines [[3, 8]]
-You should check your parenthesis
-Aborting formatting for file /tmp/tmpzf3rofts
-Aborting formatting for file /tmp/tmpzf3rofts
-create or replace transient table my_table As
-select asdf, Qwer, /* ; */
-(qwer2, -- ;
-replace(&#39;;&#39;, &#39;&#39;, qwer3) as Qwer4
-from table1
-
-create view my_view As
-(Select asdf
-From my_table;
-
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Function-to-format-many-SQL-files">Function to format many SQL files<a class="anchor-link" href="#Function-to-format-many-SQL-files"> </a></h3>
@@ -1160,7 +823,7 @@ From my_table;
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="format_sql_files" class="doc_header"><code>format_sql_files</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L193" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files</code>(<strong><code>files</code></strong>, <strong><code>recursive</code></strong>=<em><code>False</code></em>, <strong><code>max_len</code></strong>=<em><code>99</code></em>)</p>
+<h4 id="format_sql_files" class="doc_header"><code>format_sql_files</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L196" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files</code>(<strong><code>files</code></strong>, <strong><code>recursive</code></strong>=<em><code>False</code></em>, <strong><code>max_len</code></strong>=<em><code>99</code></em>)</p>
 </blockquote>
 <p>Format SQL <code>files</code></p>
 
@@ -1184,118 +847,6 @@ From my_table;
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp_dir</span><span class="p">:</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s2">&quot;tmp&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sql_file</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s2">&quot;tmp2&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sql_file</span><span class="p">)</span>
-    <span class="n">format_sql_files</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s2">&quot;tmp&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s2">&quot;tmp2&quot;</span><span class="p">)])</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s2">&quot;tmp&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">formatted_file</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="n">assert_and_print</span><span class="p">(</span>
-        <span class="n">formatted_file</span><span class="p">,</span>
-        <span class="n">expected_sql_file</span>
-    <span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s2">&quot;tmp2&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">formatted_file</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="n">assert_and_print</span><span class="p">(</span>
-        <span class="n">formatted_file</span><span class="p">,</span>
-        <span class="n">expected_sql_file</span>
-    <span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>82
-82
-All specified files were formatted!
---- Views for some nice data mart ---
-use database my_database;
-use schema my_schema;
-
-
-CREATE OR REPLACE VIEW first_view AS -- my first view
-SELECT a.car_id,
-       b.car_name,
-       sum(a.price) OVER (PARTITION BY b.car_name
-                          ORDER BY a.car_id) as sum_price,
-       a.price
-FROM   sales as a
-    LEFT JOIN (SELECT car_id,
-                      car_name
-               FROM   cars) as b
-        ON a.car_id = b.car_id
-WHERE  car_id &gt; 1
-   and car_id &lt;= 100
-ORDER BY b.car_name;
-
-
--- Table no. 1 --
-CREATE OR REPLACE TABLE first_table AS -- my first table
-SELECT car_id,
-       avg(price) as avg_price
-FROM   first_view
-GROUP BY car_id
-ORDER BY car_id;
-
---- End of file ---
-
---- Views for some nice data mart ---
-use database my_database;
-use schema my_schema;
-
-
-CREATE OR REPLACE VIEW first_view AS -- my first view
-SELECT a.car_id,
-       b.car_name,
-       sum(a.price) OVER (PARTITION BY b.car_name
-                          ORDER BY a.car_id) as sum_price,
-       a.price
-FROM   sales as a
-    LEFT JOIN (SELECT car_id,
-                      car_name
-               FROM   cars) as b
-        ON a.car_id = b.car_id
-WHERE  car_id &gt; 1
-   and car_id &lt;= 100
-ORDER BY b.car_name;
-
-
--- Table no. 1 --
-CREATE OR REPLACE TABLE first_table AS -- my first table
-SELECT car_id,
-       avg(price) as avg_price
-FROM   first_view
-GROUP BY car_id
-ORDER BY car_id;
-
---- End of file ---
-
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
 <div class="output">
@@ -1304,7 +855,7 @@ ORDER BY car_id;
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="format_sql_files_cli" class="doc_header"><code>format_sql_files_cli</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L210" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files_cli</code>()</p>
+<h4 id="format_sql_files_cli" class="doc_header"><code>format_sql_files_cli</code><a href="https://github.com/snapADDY/ptypysql/tree/master/ptypysql/format_file.py#L213" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>format_sql_files_cli</code>()</p>
 </blockquote>
 <p>Format SQL files</p>
 

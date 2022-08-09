@@ -103,7 +103,7 @@ def format_sql_commands(s, max_len=99, semicolon = True):
 # Cell
 def format_sql_file(f, max_len=99):
     """Format file `f` with SQL commands and overwrite the file.
-    If SELECT line is longer than 82 characters then reformat line
+    If SELECT line is longer than 99 characters then reformat line
 
     Return exit_code:
     * 0 = Everything already formatted
