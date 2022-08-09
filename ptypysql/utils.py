@@ -660,6 +660,10 @@ def extract_outer_subquery_too_long(s, max_len=99):
                 k -= 1
             elif c == "," and k == 0 and d%2 == 0:
                 subquery_pos.append(i)
+            elif s[i:i+3] == "AND" and k == 0 and d%2 == 0:
+                subquery_pos.append(i-1)
+            elif s[i:i+2] == "OR" and k == 0 and d%2 == 0:
+                subquery_pos.append(i-1)
             elif c == "'":
                 d += 1
 

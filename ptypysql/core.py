@@ -246,7 +246,7 @@ def format_case_when(s, max_len=99):
     case_and_or = re.compile(r"\b((?:and|or))\b", flags=re.I)
     case_then = re.compile(r"\b(then)\b", flags=re.I)
     case_end = re.compile(r"\b(end)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\([^\)\(]*?)(\band\b|\bor\b)([^\)\(]*?\))", flags=re.I)
+    indent_in_brackets = re.compile(r"(\([^\)\(]*?)\s*(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
     indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     # prepare string
@@ -273,7 +273,7 @@ def format_case_when(s, max_len=99):
     s_code = "".join([d["string"] for d in split_s])
     s_code = "\n".join([case_and_or.sub("\n" + " " * (field_indentation + 8) + r"\1", sp) if len(sp) > max_len else sp for sp in s_code.split("\n")])
         # add more newline for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " * 4 + x.group(2) + x.group(3), s_code)
+    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
                         if len(sp) > max_len else sp for sp in s_code.split("\n")])
@@ -381,7 +381,7 @@ def format_on(s, max_len = 99):
     split_s = split_comment_quote(s)
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\([^\)\(]*?)(\band\b|\bor\b)([^\)\(]*?\))", flags=re.I)
+    indent_in_brackets = re.compile(r"(\([^\)\(]*?)\s*(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
     indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     for d in split_s:
@@ -394,7 +394,7 @@ def format_on(s, max_len = 99):
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
 
     # add more newline for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " * 4 + x.group(2) + x.group(3), s_code)
+    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
 
     # add newline and indentation for between_and (experimental) if too long
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
@@ -420,7 +420,7 @@ def format_on(s, max_len = 99):
     split_s = split_comment_quote(s)
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\([^\)\(]*?)(\band\b|\bor\b)([^\)\(]*?\))", flags=re.I)
+    indent_in_brackets = re.compile(r"(\([^\)\(]*?)\s*(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
     indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     for d in split_s:
@@ -432,7 +432,7 @@ def format_on(s, max_len = 99):
     split_comment = compress_dicts(split_s, ["comment"])
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
     # add more newline for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " * 4 + x.group(2) + x.group(3), s_code)
+    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
     # add newline and indentation for between_and (experimental) if too long
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
@@ -457,7 +457,7 @@ def format_where(s, max_len = 99):
     split_s = split_comment_quote(s)
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
-    indent_in_brackets = re.compile(r"(\([^\)\(]*?)(\band\b|\bor\b)([^\)\(]*?\))", flags=re.I)
+    indent_in_brackets = re.compile(r"(\((?!\s*where)[^\)\(]*?)\s*(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(\S*?)\s+(\band\b)", flags=re.I)
     indent_between_and_indent = re.compile(r"(\bbetween\b)\s(\S*?)\s(\band\b)", flags=re.I)
     for d in split_s:
@@ -469,8 +469,8 @@ def format_where(s, max_len = 99):
     split_comment = compress_dicts(split_s, ["comment"])
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
 
-    # add more newline for and, or within brackets
-    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " * 4 + x.group(2) + x.group(3), s_code)
+    # replace newline by space for and, or within brackets
+    s_code = indent_in_brackets.sub(lambda x: x.group(1) + " " + x.group(2), s_code)
 
     # add newline and indentation for between_and (experimental) if too long
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
