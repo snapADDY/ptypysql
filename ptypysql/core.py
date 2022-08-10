@@ -296,7 +296,9 @@ def format_case_when(s, max_len=99):
 
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
-                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
+                        for sp in s_code.split("\n")])
+    # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
+    #                     if len(sp) > max_len else sp for sp in s_code.split("\n")])
 
     return s_code
 
@@ -435,10 +437,12 @@ def format_on(s, max_len = 99):
         s_code = s_code[:i-5] + s_code[i-1:]
 
 
-    # add newline and indentation for between_and (experimental) if too long
+    # add newline and indentation for between_and
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
-                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
+                        for sp in s_code.split("\n")])
+    # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
+    #                     if len(sp) > max_len else sp for sp in s_code.split("\n")])
 
     # strip lines of code from the right
     s_code = "\n".join([sp.rstrip() for sp in s_code.split("\n")])
@@ -496,10 +500,13 @@ def format_where(s, max_len = 99):
     for i in and_or_position[::-1]:
         s_code = s_code[:i-5] + s_code[i-1:]
 
-    # add newline and indentation for between_and (experimental) if too long
+    # add newline and indentation for between_and
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 8 + r"\3", sp)
-                        if len(sp) > max_len else sp for sp in s_code.split("\n")])
+                        for sp in s_code.split("\n")])
+
+    # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 8 + r"\3", sp)
+    #                     if len(sp) > max_len else sp for sp in s_code.split("\n")])
 
     # strip from the right each code line
     s_code = "\n".join([sp.rstrip() for sp in s_code.split("\n")])
