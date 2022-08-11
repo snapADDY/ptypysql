@@ -241,13 +241,14 @@ def remove_wrong_end_comma(split_s):
 # Cell
 def format_case_when(s, max_len=99):
     "Format case when statement in line `s`"
+    max_len = max_len - 16
     # compile regex
     when_else_re = re.compile(r"(?<!case) ((?:when|else).*?)", flags=re.I)
     case_and_or = re.compile(r"\b((?:and|or))\b", flags=re.I)
     case_then = re.compile(r"\b(then)\b", flags=re.I)
     case_end = re.compile(r"\b(end)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(.*?)\s+(\band\b)", flags=re.I)
-    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
+    # indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
     # prepare string
     s_strip = s.strip()
     field_indentation = len(s) - len(s_strip)
@@ -295,8 +296,8 @@ def format_case_when(s, max_len=99):
         s_code = s_code[:i-5] + s_code[i-1:]
 
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
-    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
-                        for sp in s_code.split("\n")])
+    # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
+    #                     for sp in s_code.split("\n")])
     # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
     #                     if len(sp) > max_len else sp for sp in s_code.split("\n")])
 
@@ -404,7 +405,7 @@ def format_on(s, max_len = 99):
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(.*?)\s+(\band\b)", flags=re.I)
-    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
+    # indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
     for d in split_s:
         if not d["comment"] and not d["quote"]:
             s_aux = d["string"]
@@ -439,8 +440,8 @@ def format_on(s, max_len = 99):
 
     # add newline and indentation for between_and
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
-    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
-                        for sp in s_code.split("\n")])
+    # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
+    #                     for sp in s_code.split("\n")])
     # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
     #                     if len(sp) > max_len else sp for sp in s_code.split("\n")])
 
@@ -464,7 +465,7 @@ def format_where(s, max_len = 99):
     # define regex before loop
     indent_and_or = re.compile(r"\s*\b(and|or)\b", flags=re.I)
     indent_between_and_reset = re.compile(r"(\bbetween\b)\s+(.*?)\s+(\band\b)", flags=re.I)
-    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
+#    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
     for d in split_s:
         if not d["comment"] and not d["quote"]:
             s_aux = d["string"]
@@ -502,8 +503,8 @@ def format_where(s, max_len = 99):
 
     # add newline and indentation for between_and
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
-    s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 8 + r"\3", sp)
-                        for sp in s_code.split("\n")])
+    # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 8 + r"\3", sp)
+    #                     for sp in s_code.split("\n")])
 
     # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 8 + r"\3", sp)
     #                     if len(sp) > max_len else sp for sp in s_code.split("\n")])
@@ -631,8 +632,24 @@ def format_sql(s, semicolon=False, max_len=99):
 
     # separate comment and the code since the length of comment is not considered
     s_code = "".join([d["string"] for d in split_s if not d["comment"]])
+
+    # add indent and linebreak for between_and if too long
     s_code = s_code.split("\n")
+    indent_between_and_indent = re.compile(r"(\bbetween\b)\s(.*?)\s(\band\b)", flags=re.I)
+    for s_id, s_split in enumerate(s_code):
+        if len(s_split) > max_len and indent_between_and_indent.search(s_split):
+            indent_size = len(s_split) - len(s_split.lstrip())
+            # case for e.g., where ... between ... and ...
+            if any(word in s_split for word in [" CASE WHEN ", " WHERE ", " ON "]):
+                indent_size += 8
+            # case for e.g., and ... between ... and ...
+            else:
+                indent_size += 4
+            s_code[s_id] = indent_between_and_indent.sub(r"\1 \2\n" + " " * indent_size + r"\3", s_split)
+    s_code = "\n".join(s_code)
+
     # loop for each line, reformat it if it is too long
+    s_code = s_code.split("\n")
     s_id = 0
     while s_id < len(s_code):
         sp = s_code[s_id]
