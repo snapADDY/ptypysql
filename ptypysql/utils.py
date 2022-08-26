@@ -658,7 +658,7 @@ def extract_outer_subquery_too_long(s, max_len=99):
             elif c == ")" and k == 0 and d%2 == 0: # end position for subquery
                 subquery_pos.append(i)
                 subquery_pos_and_or.append(i)
-                return subquery_pos if len(subquery_pos_and_or) == 1 else subquery_pos_and_or
+                return subquery_pos if len(subquery_pos_and_or) == 2 else subquery_pos_and_or
             elif c == ")" and k > 0 and d%2 == 0:
                 k -= 1
             elif c == "," and k == 0 and d%2 == 0:
