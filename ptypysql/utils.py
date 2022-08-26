@@ -641,6 +641,7 @@ def extract_outer_subquery_too_long(s, max_len=99):
         # initialize container for subquery positions
         # in string `s`
         subquery_pos = []
+        subquery_pos_and_or = []
         # auxiliar indicator to get the subquery right
         # counter for parenthesis
         k = -1
@@ -650,20 +651,22 @@ def extract_outer_subquery_too_long(s, max_len=99):
         for i, c in enumerate(s):
             if c == "(" and k == -1 and d%2 == 0: # The first (
                 subquery_pos.append(i)
+                subquery_pos_and_or.append(i)
                 k += 1
             elif c == "(" and d%2 == 0:
                 k += 1
             elif c == ")" and k == 0 and d%2 == 0: # end position for subquery
                 subquery_pos.append(i)
-                return subquery_pos
+                subquery_pos_and_or.append(i)
+                return subquery_pos if len(subquery_pos_and_or) == 1 else subquery_pos_and_or
             elif c == ")" and k > 0 and d%2 == 0:
                 k -= 1
             elif c == "," and k == 0 and d%2 == 0:
                 subquery_pos.append(i)
             elif s[i:i+3] == "AND" and k == 0 and d%2 == 0:
-                subquery_pos.append(i-1)
+                subquery_pos_and_or.append(i-1)
             elif s[i:i+2] == "OR" and k == 0 and d%2 == 0:
-                subquery_pos.append(i-1)
+                subquery_pos_and_or.append(i-1)
             elif c == "'":
                 d += 1
 
