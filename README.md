@@ -4,9 +4,9 @@
 
 ## How to install
 
-Via pip
+Clone the repository and run
 
-`pip install ptypysql`
+`python setup.py install`
 
 ## How to use
 
