@@ -14,9 +14,11 @@ from .utils import *
 from .validation import *
 
 # Cell
-def format_sql_commands(s, max_len=99, semicolon = True):
+
+#export
+def format_sql_commands(s_original, max_len=99, semicolon = True):
     "Format SQL commands in `s`. If SELECT line is longer than `max_len` then reformat line"
-    s = s.strip()  # strip file contents
+    s = s_original.strip()  # strip file contents
     split_s = split_by_semicolon(s)  # split by query
     # validate semicolon
     validations_semicolon = [validate_semicolon(sp) for sp in split_s]
@@ -33,6 +35,7 @@ def format_sql_commands(s, max_len=99, semicolon = True):
         check_ending_semicolon = re.compile(r";\s*$")
         split_s_out = []  # initialize container
         last_i = len(split_s) - 1
+        formatted = False
         for i, sp in enumerate(split_s):  # split by semicolon
             # take care of comment after semicolon
             # split by first newline and format only the second item
@@ -40,6 +43,9 @@ def format_sql_commands(s, max_len=99, semicolon = True):
                 split_s2 = split_comment_after_semicolon.split(sp, maxsplit=1)
             else:
                 split_s2 = [sp]
+            # check if the queries are formatted or not
+            if check_sql_query(sp) and not check_skip_marker(sp):
+                formatted = True
             formatted_split_s2 = [
                 "\n\n\n" + format_sql(sp, semicolon=semicolon, max_len=max_len).strip()
                 if check_sql_query(sp) and not check_skip_marker(sp)
@@ -57,6 +63,9 @@ def format_sql_commands(s, max_len=99, semicolon = True):
                     else formatted_sp + ";"
                 )
             split_s_out.append("".join(formatted_sp))
+        # if not formatted, return original sql
+        if not formatted:
+            return s_original
         # join by semicolon
         formatted_s = "".join(split_s_out)
         # remove starting and ending newlines
@@ -163,7 +172,7 @@ def format_sql_file(f, max_len=99):
 
         else:
             sql_commands_indented = "\n".join(remove_prefix(sql_commands_split, indent) for sql_commands_split in sql_commands.split("\n"))
-            if sql_commands_indented == formatted_file:
+            if sql_commands_indented == formatted_file or sql_commands == formatted_file:
                 exit_code += 0
             else:
                 exit_code = 1
