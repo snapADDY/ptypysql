@@ -656,7 +656,7 @@ def format_sql(s, semicolon=False, max_len=99):
         if len(sp) > max_len:
             sp_code = "\n".join(s_code[s_id:])
             if split_index := extract_outer_subquery_too_long(sp_code, max_len):
-                zip_split = zip([-1] + split_index, split_index + [len(s)])
+                zip_split = zip([-1] + split_index, split_index + [99999])
                 ss = [sp_code[i+1:j+1] for i,j in zip_split]
                 for i in range(1, len(ss) - 1):
                     ss[i] = "\n" + format_subquery_too_long(ss[i].strip(), ss[0], is_end = (i == len(ss) - 2))
@@ -666,6 +666,7 @@ def format_sql(s, semicolon=False, max_len=99):
         s_id += 1
 
     s_code = "\n".join([ss.rstrip() for ss in s_code])
+
     comment_dicts = []
     for i, d in enumerate(split_comment):
         if d["comment"]:
