@@ -12,8 +12,8 @@ from .utils import *
 
 # Cell
 MAIN_STATEMENTS = [
-    "create.*?table",  # regex for all variants, e.g. CREATE OR REPLACE TABLE
-    "create.*?view",  # regex for all variants, e.g. CREATE OR REPLACE VIEW
+    "create\s.*?table",  # regex for all variants, e.g. CREATE OR REPLACE TABLE
+    "create\s.*?view",  # regex for all variants, e.g. CREATE OR REPLACE VIEW
     "with",
     "select distinct",
     "select",
