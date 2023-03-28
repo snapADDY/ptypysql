@@ -133,6 +133,9 @@ def format_sql_file(f, max_len=99):
     for sql in sqls:
         sql_function = sql.group()
         sql_commands = sql.group(1)
+        # now only support for select clause(not support for create/insert/update etc.)
+        if not sql_commands.strip().lower().startswith(("with", "select")):
+            continue
         indent_length = len(sql_function) - len(sql_function.lstrip()) + 4
         indent = " " * indent_length
         max_len_with_indent = max_len - indent_length
