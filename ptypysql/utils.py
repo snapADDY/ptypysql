@@ -97,7 +97,7 @@ def add_whitespaces_between_symbols(s):
     "Add whitespaces between symbols in line `s`"
     s = re.sub(r"([^\s=!<>-])(-?[=!<>]+)", r"\1 \2", s, flags=re.I)  # no space left
     s = re.sub(r"([=!<>]+)([^\s=!<>])", r"\1 \2", s, flags=re.I)  # no space right
-    s = re.sub(r"([^\s=!<>-])(-?[=!<>]+)([^\s=!<>])", r"\1 \2 \3", s, flags=re.I)  # no space left and right
+    s = re.sub(r"([^\s=!<>#-])(-?[=!<>]+)([^\s=!<>])", r"\1 \2 \3", s, flags=re.I)  # no space left and right
     return s
 
 # Cell
