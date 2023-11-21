@@ -15,6 +15,7 @@ from itertools import accumulate
 from collections import Counter
 import operator
 
+
 # Cell
 def assert_and_print(s_in, s_expected):
     "Assert equality of `s_in` and `s_expected` and print the result of `s_in` if the assertion worked"
@@ -42,6 +43,7 @@ def assert_and_print(s_in, s_expected):
     print(s_in)
     return None
 
+
 # Cell
 def compress_dicts(ld, keys):
     "Compress list of dicts `ld` with same `keys` concatenating key 'string'"
@@ -60,12 +62,14 @@ def compress_dicts(ld, keys):
             ld_out.append(d)
     return ld_out
 
+
 # Cell
 def remove_whitespaces_newline(s):
     "Remove whitespaces before and after newline in `s`"
     s = re.sub(r"\n[\r\t\f\v ]+", "\n", s)  # remove whitespaces after newline
     s = re.sub(r"[\r\t\f\v ]+\n", "\n", s)  # remove whitespaces before newline
     return s
+
 
 # Cell
 def remove_whitespaces_comments(s):
@@ -78,12 +82,14 @@ def remove_whitespaces_comments(s):
     s = re.sub(r"[\r\t\f\v ]+\[CI\]", "[CI]", s)  # remove whitespaces before comment token [CI]
     return s
 
+
 # Cell
 def remove_redundant_whitespaces(s):
     "Strip and remove redundant (more than 2) whitespaces in `s` but no newlines in between"
     s = s.strip()
     s = re.sub(r"[\r\t\f\v ]{2,}", " ", s)  # remove too many whitespaces but not newlines
     return s
+
 
 # Cell
 def remove_whitespaces_parenthesis(s):
@@ -92,13 +98,15 @@ def remove_whitespaces_parenthesis(s):
     s = re.sub(r"[\r\t\f\v ]+\)", ")", s)  # remove whitespaces before )
     return s
 
+
 # Cell
 def add_whitespaces_between_symbols(s):
     "Add whitespaces between symbols in line `s`"
-    s = re.sub(r"([^\s=!<>#-])(-?[=!<>]+)", r"\1 \2", s, flags=re.I)  # no space left
+    s = re.sub(r"([^\s=!<>@#-])(-?[=!<>]+)", r"\1 \2", s, flags=re.I)  # no space left
     s = re.sub(r"([=!<>]+)([^\s=!<>])", r"\1 \2", s, flags=re.I)  # no space right
     s = re.sub(r"([^\s=!<>-])(-?[=!<>]+)([^\s=!<>])", r"\1 \2 \3", s, flags=re.I)  # no space left and right
     return s
+
 
 # Cell
 def mark_ci_comments(s):
@@ -190,6 +198,7 @@ def mark_ci_comments(s):
         s = "".join([c if i not in positions else "[CI]" for i, c in enumerate(s)])
         return s
 
+
 # Cell
 def mark_comments(s):
     "Mark end of comments -- and begin of comments /* */ if they are in a new line with token [C]"
@@ -200,6 +209,7 @@ def mark_comments(s):
     s = re.sub(r"(\n)\s*(\/\*.*?\*\/)", r"\1[CS]\2", s, flags=re.DOTALL)  # mark start of comment line with /*
     s = mark_ci_comments(s)  # replace intercomment new lines by [CI]
     return s
+
 
 # Cell
 def split_query(s):
@@ -438,10 +448,12 @@ def split_query(s):
     s_comp = [d for d in s_comp if d["string"] != ""]  # remove empty strings
     return s_comp
 
+
 # Cell
 def split_apply_concat(s, f):
     "Split query `s`, apply function `f` and concatenate strings"
     return "".join([d["string"] for d in f(split_query(s))])
+
 
 # Cell
 def split_comment_quote(s):
@@ -451,6 +463,7 @@ def split_comment_quote(s):
     split_s = compress_dicts(split_s, keys=["comment", "quote"])
     return split_s
 
+
 # Cell
 def split_comment(s):
     "Split query `s` into dictionaries with keys 'string', 'comment'"
@@ -458,6 +471,7 @@ def split_comment(s):
     # compress all strings with same keys
     split_s = compress_dicts(split_s, keys=["comment"])
     return split_s
+
 
 # Cell
 def identify_in_sql(regex, s):
@@ -479,6 +493,7 @@ def identify_in_sql(regex, s):
     positions = sorted(positions)  # sort positions before returning
     return positions
 
+
 # Cell
 def split_by_semicolon(s):
     "Split string `s` by semicolon but not between parenthesis or in comments"
@@ -497,12 +512,14 @@ def split_by_semicolon(s):
             split_s.append(s[start+1:end])  # do not take the semicolon
     return split_s
 
+
 # Cell
 def replace_newline_chars(s):
     "Replace newline characters in `s` by whitespace but not in the comments"
     positions = identify_in_sql("\n", s)
     clean_s = "".join([c if i not in positions else " " for i, c in enumerate(s)])
     return clean_s
+
 
 # Cell
 def sub_in_sql(regex, repl, s):
@@ -514,11 +531,13 @@ def sub_in_sql(regex, repl, s):
     s = "".join(d["string"] for d in split_s)
     return s
 
+
 # Cell
 def add_whitespaces_after_comma(s):
     "Add whitespace after comma in query `s` if there is no whitespace"
     s = sub_in_sql(r",([\w\d]+)", r", \1", s)
     return s
+
 
 # Cell
 def identify_end_of_fields(s):
@@ -549,6 +568,7 @@ def identify_end_of_fields(s):
             quote_open2 = False
     return end_of_fields
 
+
 # Cell
 def add_newline_indentation(s, indentation):
     "Add newline and indentation for end of fields in query `s`"
@@ -566,6 +586,7 @@ def add_newline_indentation(s, indentation):
     s = "".join(split_s)
     s = s.strip()
     return s
+
 
 # Cell
 def extract_outer_subquery(s):
@@ -592,6 +613,7 @@ def extract_outer_subquery(s):
             return subquery_pos
         elif c == ")":
             k -= 1
+
 
 # Cell
 def format_subquery(s, previous_s):
@@ -632,6 +654,7 @@ def format_subquery(s, previous_s):
     formatted_s = re.sub(r"\s*(\))$", "\n" + " " * last_line_indent + r"\1", formatted_s)
     return formatted_s
 
+
 # Cell
 def extract_outer_subquery_too_long(s, max_len=99):
     "Extract outer subquery in query `li`"
@@ -670,6 +693,7 @@ def extract_outer_subquery_too_long(s, max_len=99):
             elif c == "'":
                 d += 1
 
+
 # Cell
 def format_subquery_too_long(s, previous_s, is_end):
     "Format subquery in line `s` based on indentation on `previous_s`"
@@ -688,6 +712,7 @@ def format_subquery_too_long(s, previous_s, is_end):
         formatted_s = re.sub(r"\s*(\))$", "\n" + " " * last_line_indent + r"\1", formatted_s)
     return formatted_s
 
+
 # Cell
 def check_sql_query(s):
     """Checks whether `s` is a SQL query based on match of CREATE TABLE / VIEW or SELECT ignoring comments and text
@@ -697,10 +722,12 @@ def check_sql_query(s):
     return (bool(re.search(pattern=r"\bselect\b|\bcreate\b.{0,27}(\btable\b|\bview\b)", string=s_code, flags=re.I)) and
             not bool(re.search(pattern=r"\bcreate\b(?!.*(\btable\b|\bview\b))", string=s_code, flags=re.I)))
 
+
 # Cell
 def check_skip_marker(s):
     "Checks whether user set marker /*skip-formatter*/ to not format query"
     return bool(re.search(r"\/\*skip-formatter\*\/", s))
+
 
 # Cell
 def identify_create_table_view(s):
@@ -715,15 +742,18 @@ def identify_create_table_view(s):
     ]
     return line_numbers
 
+
 # Cell
 def count_lines(s):
     "Count the number of lines in `s`"
     return s.count("\n")
 
+
 # Cell
 def find_line_number(s, positions):
     "Find line number in `s` out of `positions`"
     return [s[0:pos].count("\n") + 1 for pos in positions]
+
 
 # Cell
 def disimilarity(str1, str2):
@@ -740,6 +770,7 @@ def disimilarity(str1, str2):
     for w in all_words:
         disimilarity += abs(count1[w] - count2[w])
     return disimilarity
+
 
 # Cell
 def assign_comment(fs, cds):
@@ -781,6 +812,7 @@ def assign_comment(fs, cds):
         )
     s_out = "\n".join(fsplit_s_out)
     return s_out
+
 
 # Cell
 def remove_prefix(text, prefix):
