@@ -6,6 +6,7 @@ __all__ = ['validate_semicolon', 'validate_balanced_parenthesis', 'validate_case
 import math
 from .utils import *
 
+
 # Cell
 def validate_semicolon(s):
     """Validate query `s` by looking for forgotten semicolon.
@@ -19,6 +20,7 @@ def validate_semicolon(s):
         validation["exit_code"] = 1
         validation["val_lines"] = positions
     return validation
+
 
 # Cell
 def validate_balanced_parenthesis(s):
@@ -132,6 +134,7 @@ def validate_balanced_parenthesis(s):
             "val_lines": find_line_number(s, positions),
             "total_lines": count_lines(s)
         }
+
 
 # Cell
 def validate_case_when(s):
