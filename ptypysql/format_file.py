@@ -13,10 +13,9 @@ from .core import *
 from .utils import *
 from .validation import *
 
-# Cell
 
-#export
-def format_sql_commands(s_original, max_len=99, semicolon = True):
+# Cell
+def format_sql_commands(s_original, max_len=99, semicolon=True):
     "Format SQL commands in `s`. If SELECT line is longer than `max_len` then reformat line"
     s = s_original.strip()  # strip file contents
     split_s = split_by_semicolon(s)  # split by query
@@ -58,8 +57,7 @@ def format_sql_commands(s_original, max_len=99, semicolon = True):
                 s_code = "".join([d["string"] for d in split_c if not d["comment"]])
                 formatted_sp = (
                     formatted_sp
-                    if check_ending_semicolon.search(s_code)
-                    or formatted_sp == ""
+                    if check_ending_semicolon.search(s_code) or formatted_sp == ""
                     else formatted_sp + ";"
                 )
             split_s_out.append("".join(formatted_sp))
@@ -79,35 +77,42 @@ def format_sql_commands(s_original, max_len=99, semicolon = True):
         error_dict = {}
         if val_summary_semicolon > 0:
             file_lines = [
-                tuple([line + sum([sd["total_lines"] for sd in validations_semicolon[0:i]]) for line in d["val_lines"]])
+                tuple(
+                    [
+                        line
+                        + sum([sd["total_lines"] for sd in validations_semicolon[0:i]])
+                        for line in d["val_lines"]
+                    ]
+                )
                 for i, d in enumerate(validations_semicolon)
                 if d["exit_code"] == 1
             ]
-            error_dict["semicolon"] = {
-                "error_code": 2,
-                "lines": file_lines
-            }
+            error_dict["semicolon"] = {"error_code": 2, "lines": file_lines}
         if val_summary_balanced > 0:
             file_lines = [
-                [line + sum([sd["total_lines"] for sd in validations_balanced[0:i]]) for line in d["val_lines"]]
+                [
+                    line + sum([sd["total_lines"] for sd in validations_balanced[0:i]])
+                    for line in d["val_lines"]
+                ]
                 for i, d in enumerate(validations_balanced)
                 if d["exit_code"] == 1
             ]
             error_dict["unbalanced_parenthesis"] = {
                 "error_code": 3,
-                "lines": file_lines
+                "lines": file_lines,
             }
         if val_summary_case > 0:
             file_lines = [
-                [line + sum([sd["total_lines"] for sd in val_case_end_balanced[0:i]]) for line in d["val_lines"]]
+                [
+                    line + sum([sd["total_lines"] for sd in val_case_end_balanced[0:i]])
+                    for line in d["val_lines"]
+                ]
                 for i, d in enumerate(val_case_end_balanced)
                 if d["exit_code"] == 1
             ]
-            error_dict["unbalanced_case"] = {
-                "error_code": 4,
-                "lines": file_lines
-            }
+            error_dict["unbalanced_case"] = {"error_code": 4, "lines": file_lines}
         return error_dict
+
 
 # Cell
 def format_sql_file(f, max_len=99):
@@ -127,8 +132,12 @@ def format_sql_file(f, max_len=99):
 
     # use for python
     # TODO: support for custom SQL string searching
-    sql_regex = re.compile(r'.+DB\.(?:fetch|execute)(?:\_\w+)?\(\s*\"\"\"\s*(?:--sql)?\s*([\s\S]+?)\"\"\"\,?')
-    sql_heading = re.compile(r'(DB\.(?:fetch|execute)(?:\_\w+)?\()(\s*\"\"\"\s*(?:--sql)?\s*)')
+    sql_regex = re.compile(
+        r".+DB\.(?:fetch|execute)(?:\_\w+)?\(\s*f*\"\"\"\s*(?:--sql)?\s*([\s\S]+?)\"\"\"\,?"
+    )
+    sql_heading = re.compile(
+        r"(DB\.(?:fetch|execute)(?:\_\w+)?\()(?:\s*(f*\"\"\")\s*(?:--sql)?\s*)"
+    )
     sqls = sql_regex.finditer(py_scripts)
     for sql in sqls:
         sql_function = sql.group()
@@ -140,61 +149,77 @@ def format_sql_file(f, max_len=99):
         indent = " " * indent_length
         max_len_with_indent = max_len - indent_length
         # format SQL statements, and only add semicolon if SQL input of the function is finished, i.e., get ","
-        if sql_function.endswith(','):
-            formatted_file = format_sql_commands(sql_commands, max_len=max_len_with_indent, semicolon = True)
+        if sql_function.endswith(","):
+            formatted_file = format_sql_commands(
+                sql_commands, max_len=max_len_with_indent, semicolon=True
+            )
         else:
-            formatted_file = format_sql_commands(sql_commands, max_len=max_len_with_indent, semicolon = False)
+            formatted_file = format_sql_commands(
+                sql_commands, max_len=max_len_with_indent, semicolon=False
+            )
         if isinstance(formatted_file, dict):
             print(f"Something went wrong in file: {f}")
             if "semicolon" in formatted_file.keys():
                 print(
                     (
-                    "[WARNING] Identified CREATE keyword more than twice within the same query " +
-                    f"at lines {formatted_file['semicolon']['lines']}\n"
-                    "You may have forgotten a semicolon (;) to delimit the queries"
+                        "[WARNING] Identified CREATE keyword more than twice within the same query "
+                        + f"at lines {formatted_file['semicolon']['lines']}\n"
+                        "You may have forgotten a semicolon (;) to delimit the queries"
                     )
                 )
             if "unbalanced_parenthesis" in formatted_file.keys():
                 print(
                     (
-                    "[WARNING] Identified unbalanced parenthesis " +
-                    f"at lines {formatted_file['unbalanced_parenthesis']['lines']}\n"
-                    "You should check your parenthesis"
+                        "[WARNING] Identified unbalanced parenthesis "
+                        + f"at lines {formatted_file['unbalanced_parenthesis']['lines']}\n"
+                        "You should check your parenthesis"
                     )
                 )
             if "unbalanced_case" in formatted_file.keys():
                 print(
                     (
-                    "[WARNING] Identified unbalanced case when ... end " +
-                    f"at lines {formatted_file['unbalanced_case']['lines']}\n"
-                    "You should check for missing case or end keywords"
+                        "[WARNING] Identified unbalanced case when ... end "
+                        + f"at lines {formatted_file['unbalanced_case']['lines']}\n"
+                        "You should check for missing case or end keywords"
                     )
                 )
             print(f"Aborting formatting for file {f}")
             return 2
 
         else:
-            sql_commands_indented = "\n".join(remove_prefix(sql_commands_split, indent) for sql_commands_split in sql_commands.split("\n"))
-            if sql_commands_indented == formatted_file or sql_commands == formatted_file:
+            sql_commands_indented = "\n".join(
+                remove_prefix(sql_commands_split, indent)
+                for sql_commands_split in sql_commands.split("\n")
+            )
+            if (
+                sql_commands_indented == formatted_file
+                or sql_commands == formatted_file
+            ):
                 exit_code += 0
             else:
                 exit_code = 1
                 # for safety
                 if sql_function in py_scripts and sql_commands in sql_function:
-                    formatted_file = "\n".join([indent + s for s in formatted_file.split("\n")])
-                    formatted_function = sql_heading.sub(r'\1' + f'\n{indent}"""\n', sql_function)
-                    formatted_function = formatted_function.replace(sql_commands, formatted_file)
+                    formatted_file = "\n".join(
+                        [indent + s for s in formatted_file.split("\n")]
+                    )
+                    formatted_function = sql_heading.sub(
+                        r"\1" + f"\n{indent}" + r"\2\n", sql_function
+                    )
+                    formatted_function = formatted_function.replace(
+                        sql_commands, formatted_file
+                    )
                     py_scripts = py_scripts.replace(sql_function, formatted_function)
                 else:
                     print(f"Something went wrong in file: {f}")
                     print(
                         (
-                        f"[WARNING] The original SQL query does not exist in the file : {f}\n" +
-                        f"The corresponding SQL query is:\n{sql_commands} \n" +
-                        f"The formatted SQL query is:\n{formatted_file} \n" +
-                        "You may want to replace the SQL query manually"
+                            f"[WARNING] The original SQL query does not exist in the file : {f}\n"
+                            + f"The corresponding SQL query is:\n{sql_commands} \n"
+                            + f"The formatted SQL query is:\n{formatted_file} \n"
+                            + "You may want to replace the SQL query manually"
                         )
-                   )
+                    )
                     return 2
 
     # overwrite file
@@ -203,6 +228,7 @@ def format_sql_file(f, max_len=99):
             file.write(py_scripts)
 
     return exit_code
+
 
 # Cell
 def format_sql_files(files, recursive=False, max_len=99):
@@ -221,6 +247,7 @@ def format_sql_files(files, recursive=False, max_len=99):
     else:
         print("All specified files were formatted!")
 
+
 # Cell
 def format_sql_files_cli():
     "Format SQL files"
@@ -229,26 +256,28 @@ def format_sql_files_cli():
         "files",
         help='Path to SQL files. You can also use wildcard using ".*sql"',
         type=str,
-        nargs="+"
+        nargs="+",
     )
     parser.add_argument(
         "-r",
         "--recursive",
         help="Should files also be searched in subfolders?",
-        action="store_true"
+        action="store_true",
     )
     parser.add_argument(
         "-m",
         "--max-line-length",
         help="Maximum line length for trunction of SELECT fields",
         type=int,
-        default=99
+        default=99,
     )
     parser.add_argument(
         "-v",
         "--version",
         action="version",
-        version=f"ptypysql version {ptypysql.__version__}"
+        version=f"ptypysql version {ptypysql.__version__}",
     )
     args = parser.parse_args()
-    format_sql_files(files=args.files, recursive=args.recursive, max_len=args.max_line_length)
+    format_sql_files(
+        files=args.files, recursive=args.recursive, max_len=args.max_line_length
+    )
