@@ -346,27 +346,27 @@ def format_case_when(s, max_len=99):
         ]
     )
 
-    # search for and/or within parentheses
-    # counter for parenthesis
-    k = 0
-    # counter for '
-    d = 0
-    # loop over string characters
-    and_or_position = []
-    for i, c in enumerate(s_code):
-        if c == "(" and d % 2 == 0:  # The first (
-            k += 1
-        elif c == ")" and k > 0 and d % 2 == 0:
-            k -= 1
-        elif s_code[i : i + 3] == "AND" and k > 0 and d % 2 == 0:
-            and_or_position.append(i)
-        elif s_code[i : i + 2] == "OR" and k > 0 and d % 2 == 0:
-            and_or_position.append(i)
-        elif c == "'":
-            d += 1
-    # remove linebreak starting from the end (index problem)
-    for i in and_or_position[::-1]:
-        s_code = s_code[: i - 5] + s_code[i - 1 :]
+    # # search for and/or within parentheses
+    # # counter for parenthesis
+    # k = 0
+    # # counter for '
+    # d = 0
+    # # loop over string characters
+    # and_or_position = []
+    # for i, c in enumerate(s_code):
+    #     if c == "(" and d % 2 == 0:  # The first (
+    #         k += 1
+    #     elif c == ")" and k > 0 and d % 2 == 0:
+    #         k -= 1
+    #     elif s_code[i : i + 3] == "AND" and k > 0 and d % 2 == 0:
+    #         and_or_position.append(i)
+    #     elif s_code[i : i + 2] == "OR" and k > 0 and d % 2 == 0:
+    #         and_or_position.append(i)
+    #     elif c == "'":
+    #         d += 1
+    # # remove linebreak starting from the end (index problem)
+    # for i in and_or_position[::-1]:
+    #     s_code = s_code[: i - 5] + s_code[i - 1 :]
 
     s_code = indent_between_and_reset.sub(r"\1 \2 \3", s_code)
     # s_code = "\n".join([indent_between_and_indent.sub(r"\1 \2\n" + " " * 12 + r"\3", sp)
