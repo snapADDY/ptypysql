@@ -181,7 +181,7 @@ def preformat_statements(s):
         split_s = [
             {
                 "string": re.sub(
-                    rf"\b({statement})\b",
+                    rf"(?<!')\b({statement})\b(?!')",
                     statement.upper(),
                     sdict["string"],
                     flags=re.I,
